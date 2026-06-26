@@ -6,7 +6,7 @@
 
 **Architecture:** A stateless request/response pipeline (classify → policy gate → assemble → generate → deterministic guardrail → persist) runs in Next.js route handlers. All conversation state lives in Supabase Postgres keyed by `conversation_id`, so simultaneous chatters are fully isolated and Vercel's serverless functions scale horizontally. A small structured knowledge base (3 courses + ~30 FAQs + policies + asset registry) is loaded from Postgres and injected into context — **no vector DB** (the KB fits in one model context). High-risk money/dispute/complaint cases never get an AI answer; they get a holding reply + an escalation record for async human follow-up.
 
-**Tech Stack:** Next.js 16 + React 19 (existing), TypeScript, Supabase Postgres (existing, `@supabase/supabase-js` admin client), OpenAI (`openai` SDK), Vitest (unit), Playwright (e2e). All SwH code is namespaced under `nomadcraft-next/swh/` for easy future extraction.
+**Tech Stack:** Next.js 16 + React 19 (existing), TypeScript, Supabase Postgres (existing, `@supabase/supabase-js` admin client), **Google Gemini** (`@google/generative-ai` — already a dependency; reuses the app's existing `gemini-2.5-flash` integration and `GEMINI_API_KEY`), Vitest (unit), Playwright (e2e). The LLM sits behind an `LlmClient` interface, so swapping to OpenAI later is a one-file change. All SwH code is namespaced under `nomadcraft-next/swh/` for easy future extraction.
 
 ---
 
@@ -77,10 +77,10 @@
 
 Run:
 ```bash
-npm install openai papaparse
+npm install papaparse dotenv
 npm install -D @types/papaparse tsx
 ```
-Expected: packages added, no errors.
+Expected: packages added, no errors. (`@google/generative-ai` is already a dependency — no LLM SDK to add.)
 
 - [ ] **Step 2: Add seed script to package.json**
 
@@ -94,18 +94,21 @@ In `package.json` `"scripts"`, add:
 Append to `.env.example`:
 ```
 # --- SwH chatbot ---
-OPENAI_API_KEY=sk-...           # OpenAI API key (server-side only)
+# GEMINI_API_KEY is already present (reused from the existing AI route).
 SWH_ADMIN_PASSWORD=             # Shared password gating /swh-inbox
-# Optional model overrides (defaults: classify=gpt-4o-mini, generate=gpt-4o)
-# SWH_CLASSIFY_MODEL=
-# SWH_GENERATE_MODEL=
+# Optional model override (default: gemini-2.5-flash)
+# SWH_LLM_MODEL=
 ```
 
-Add real values to `.env.local` (copy `OPENAI_API_KEY` from `/Users/minhphan/Desktop/code/swh/.env`, and set a `SWH_ADMIN_PASSWORD`). Do not commit `.env.local`.
+In `.env.local`, `GEMINI_API_KEY` already exists. Just add a `SWH_ADMIN_PASSWORD` value. Do not commit `.env.local`.
 
 - [ ] **Step 4: Ensure Vitest picks up `swh/` tests**
 
-Read `vitest.config.mts`. If it has an `include` array that does not already match `swh/**`, add `'swh/**/*.test.ts'`. If there is no `include` (Vitest defaults already match `**/*.test.ts`), leave it unchanged.
+`vitest.config.mts` currently has `include: ['tests/unit/**/*.test.ts']` and an `@` → root alias. Add `'swh/**/*.test.ts'` to the `include` array so the co-located SwH tests run:
+```ts
+include: ['tests/unit/**/*.test.ts', 'swh/**/*.test.ts'],
+```
+The `@` alias already resolves `@/swh/*`, so no alias change is needed.
 
 - [ ] **Step 5: Verify toolchain**
 
@@ -858,43 +861,52 @@ git commit -m "feat(swh): KB loader + selectKnowledge with tests"
 
 ## Phase 2 — Classification
 
-### Task 2.1: LLM client (OpenAI impl)
+### Task 2.1: LLM client (Gemini impl)
 
 **Files:**
 - Create: `swh/llm.ts`
 
+Reuses the same `@google/generative-ai` pattern as the existing `app/api/ai/chat/route.ts` (assistant→model role mapping, `startChat` history + final message). Provider-neutral factory name `createLlmClient` so a future OpenAI swap only edits this file.
+
 - [ ] **Step 1: Implement `swh/llm.ts`**
 
 ```ts
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { LlmClient, ChatTurn } from '@/swh/types';
 import { parseClassification } from '@/swh/classify';
 
-export function createOpenAiClient(): LlmClient {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('Missing OPENAI_API_KEY');
-  const client = new OpenAI({ apiKey });
-  const classifyModel = process.env.SWH_CLASSIFY_MODEL ?? 'gpt-4o-mini';
-  const generateModel = process.env.SWH_GENERATE_MODEL ?? 'gpt-4o';
+export function createLlmClient(): LlmClient {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('Missing GEMINI_API_KEY');
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const modelName = process.env.SWH_LLM_MODEL ?? 'gemini-2.5-flash';
 
   return {
     async classify(prompt: string) {
-      const res = await client.chat.completions.create({
-        model: classifyModel,
-        temperature: 0,
-        response_format: { type: 'json_object' },
-        messages: [{ role: 'user', content: prompt }],
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: { temperature: 0, responseMimeType: 'application/json' },
       });
-      return parseClassification(res.choices[0]?.message?.content ?? '');
+      const res = await model.generateContent(prompt);
+      return parseClassification(res.response.text());
     },
     async complete(system: string, messages: ChatTurn[]) {
-      const res = await client.chat.completions.create({
-        model: generateModel,
-        temperature: 0.7,
-        max_tokens: 800,
-        messages: [{ role: 'system', content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))],
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: system,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 800 },
       });
-      return (res.choices[0]?.message?.content ?? '').trim();
+      // Gemini takes history (assistant->model) + a final user message.
+      // History must begin with a 'user' turn, so drop any leading 'model' turns.
+      const last = messages[messages.length - 1];
+      const history = messages.slice(0, -1).map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+      while (history.length && history[0].role === 'model') history.shift();
+      const chat = model.startChat({ history });
+      const res = await chat.sendMessage(last?.content ?? '');
+      return res.response.text().trim();
     },
   };
 }
@@ -1825,7 +1837,7 @@ Skim `node_modules/next/dist/docs/` for the current route-handler signature (the
 ```ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createOpenAiClient } from '@/swh/llm';
+import { createLlmClient } from '@/swh/llm';
 import { loadKnowledgeBase } from '@/swh/kb';
 import { runPipeline } from '@/swh/pipeline';
 import { tooSoon } from '@/swh/rate-limit';
@@ -1860,7 +1872,7 @@ export async function POST(request: NextRequest) {
     const [kb, history, alreadyClarified] = await Promise.all([
       loadKnowledgeBase(), getHistory(db, conversationId), lastAssistantWasClarify(db, conversationId),
     ]);
-    const llm = createOpenAiClient();
+    const llm = createLlmClient();
     const result = await runPipeline({ text, history: history.slice(0, -1), kb, alreadyClarified }, llm);
 
     await saveAssistantResult(db, conversationId, result);
@@ -2296,8 +2308,8 @@ Customer-facing AI consultant for SpeakwithHang. Lives inside nomadcraft-next.
 - `/swh-inbox` — team worklist (password = SWH_ADMIN_PASSWORD)
 
 ## Env (.env.local + Vercel)
-- OPENAI_API_KEY, SWH_ADMIN_PASSWORD
-- (optional) SWH_CLASSIFY_MODEL, SWH_GENERATE_MODEL
+- GEMINI_API_KEY (already set), SWH_ADMIN_PASSWORD
+- (optional) SWH_LLM_MODEL (default gemini-2.5-flash)
 
 ## Update the knowledge base (no code deploy)
 - Edit rows directly in Supabase tables `swh_courses` / `swh_faqs` / `swh_policies` / `swh_assets`, OR
@@ -2312,7 +2324,7 @@ Customer-facing AI consultant for SpeakwithHang. Lives inside nomadcraft-next.
 
 - [ ] **Step 4: Configure Vercel env + deploy**
 
-Add `OPENAI_API_KEY` and `SWH_ADMIN_PASSWORD` to the nomadcraft-next Vercel project env. Apply the migration to the production Supabase, then run `npm run swh:seed` against prod env. Deploy (push to the branch Vercel builds).
+Ensure `GEMINI_API_KEY` and `SWH_ADMIN_PASSWORD` are in the nomadcraft-next Vercel project env. Apply the migration to the production Supabase, then run `npm run swh:seed` against prod env. Deploy (push to the branch Vercel builds).
 
 - [ ] **Step 5: Commit**
 
