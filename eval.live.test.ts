@@ -54,7 +54,9 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
 
       // Classify with bounded concurrency (the local model serves several at once),
       // applying the pipeline's deterministic safety net. Then score in order.
-      const CONCURRENCY = PROVIDER === 'ollama' ? 4 : 1;
+      // CPU-bound inference does not benefit from concurrency (cores are shared,
+      // extra KV-caches thrash RAM) — keep it sequential.
+      const CONCURRENCY = 1;
       const results: { c: EvalCase; cls: Classification | null }[] = [];
       for (let i = 0; i < EVAL_CASES.length; i += CONCURRENCY) {
         const batch = EVAL_CASES.slice(i, i + CONCURRENCY);
