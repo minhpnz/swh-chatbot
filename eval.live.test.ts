@@ -102,6 +102,6 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
       expect(decisionHits / ran, 'decision accuracy over cases that ran').toBeGreaterThanOrEqual(0.85);
       expect(intentHits / ran, 'intent accuracy over cases that ran').toBeGreaterThanOrEqual(0.8);
     },
-    1800000,
+    7200000,
   );
 });
