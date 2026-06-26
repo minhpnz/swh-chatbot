@@ -1,0 +1,12 @@
+[
+  { "type": "form", "key": "form_general", "label": "Form tư vấn chung", "value": "https://forms.gle/b4sbjbLG6nkfAaGbA", "when_to_use": "Khách hỏi tư vấn chung / để lại thông tin" },
+  { "type": "form", "key": "form_placement", "label": "Form test trình độ", "value": "https://forms.gle/2TpDaYTAGaEMXyKN8", "when_to_use": "Khách quan tâm 1 khoá cụ thể / cần đánh giá level" },
+  { "type": "image", "key": "img_banner_grammar", "label": "Banner tổng ngữ pháp", "value": "https://speakwithhang.com/wp-content/uploads/2025/09/banner-tong-ngu-phap.jpg", "when_to_use": "Tư vấn chung" },
+  { "type": "image", "key": "img_banner_speaking", "label": "Banner giao tiếp", "value": "https://speakwithhang.com/wp-content/uploads/2025/09/banner-tong-giao-tiep.jpg", "when_to_use": "Hỏi lớp online/giao tiếp" },
+  { "type": "phone", "key": "hotline", "label": "Hotline", "value": "032 965 1802", "when_to_use": "Khách cần liên hệ gấp" },
+  { "type": "template", "key": "holding_payment", "value": "Phần đóng tiền/thanh toán tụi mình sẽ nhờ tư vấn viên hỗ trợ trực tiếp cho chính xác nha. Bạn cho tụi mình xin Tên + SĐT để tư vấn viên liên hệ lại sớm nhất nhé 🥰" },
+  { "type": "template", "key": "holding_refund", "value": "Về phần hoàn tiền/hoàn cọc của trường hợp cụ thể của bạn, tụi mình xin phép nhờ tư vấn viên kiểm tra và hỗ trợ trực tiếp nha. Bạn để lại Tên + SĐT giúp tụi mình nhé 🩷" },
+  { "type": "template", "key": "holding_complaint", "value": "Tụi mình thành thật xin lỗi vì trải nghiệm chưa tốt nha 🥺. Bạn cho tụi mình xin Tên + SĐT, tụi mình sẽ nhờ người phụ trách liên hệ lại hỗ trợ bạn sớm nhất ạ." },
+  { "type": "template", "key": "holding_default", "value": "Phần này tụi mình xin phép nhờ tư vấn viên hỗ trợ trực tiếp cho bạn nha. Bạn để lại Tên + SĐT giúp tụi mình, tụi mình sẽ liên hệ lại sớm nhất nhé 🥰" },
+  { "type": "template", "key": "fallback_error", "value": "Tin nhắn tụi mình đang hơi quá tải xíu 🥹. Bạn để lại Tên + SĐT, tụi mình sẽ liên hệ lại tư vấn cho bạn sớm nhất nha!" }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "topic": "bao_luu",
+    "risk_level": "low",
+    "public_answer": "Hiện tại bên mình hông có chính sách bảo lưu khóa học nha. Các lớp được khai giảng liên tục trong năm, nên nếu thời gian này bạn đang bận thì có thể sắp xếp đăng ký lớp tiếp theo khi phù hợp hơn nè.",
+    "allowed_action": "answer",
+    "requires_human": false
+  },
+  {
+    "topic": "refund_policy",
+    "risk_level": "low",
+    "public_answer": "Tụi mình hông hoàn lại fee với bất cứ trường hợp nghỉ ngang nào nha. Trước khi đăng ký, tụi mình sẽ gửi bạn video record của GV để bạn xem kỹ cách dạy có hợp với mình hem, hợp rồi mới đăng ký nha.",
+    "allowed_action": "answer",
+    "requires_human": false
+  },
+  {
+    "topic": "absence_makeup",
+    "risk_level": "low",
+    "public_answer": "SwH hông có lớp học bù, nhưng tụi mình sẽ cấp video record buổi học đó. Lưu ý: mỗi tháng chỉ được nghỉ tối đa 2 buổi mới được cấp video; từ buổi thứ 3 trở đi thì hông cấp được nữa nha.",
+    "allowed_action": "answer",
+    "requires_human": false
+  },
+  {
+    "topic": "transfer_class",
+    "risk_level": "low",
+    "public_answer": "Nếu lớp bạn đăng ký CHƯA khai giảng và có lý do hợp lý thì tụi mình có thể hỗ trợ chuyển lớp nếu còn slot nha. Còn lớp đã khai giảng thì hông chuyển được do nội dung mỗi lớp đã khác nhau rồi.",
+    "allowed_action": "answer",
+    "requires_human": false
+  },
+  {
+    "topic": "record_policy",
+    "risk_level": "low",
+    "public_answer": "Tụi mình chỉ cấp video record cho bạn nghỉ có lý do bất khả kháng thôi nha (tối đa 2 buổi/tháng). Đi học mà có record sẵn thì dễ mất tập trung, học hông hiệu quả đó.",
+    "allowed_action": "answer",
+    "requires_human": false
+  },
+  {
+    "topic": "deposit",
+    "risk_level": "high",
+    "public_answer": "Để giữ slot lớp thì tụi mình nhận cọc 1.000.000đ nha. Bạn để lại Tên + SĐT, tụi mình sẽ hướng dẫn cụ thể nhen.",
+    "allowed_action": "holding_then_escalate",
+    "requires_human": true
+  },
+  {
+    "topic": "payment",
+    "risk_level": "high",
+    "public_answer": "Phần đóng tiền/thanh toán tụi mình sẽ nhờ tư vấn viên hỗ trợ trực tiếp cho chính xác nha. Bạn để lại Tên + SĐT giúp tụi mình nhé.",
+    "allowed_action": "escalate",
+    "requires_human": true
+  },
+  {
+    "topic": "complaint",
+    "risk_level": "high",
+    "public_answer": "Tụi mình xin lỗi vì trải nghiệm chưa tốt của bạn nha. Bạn để lại Tên + SĐT, tụi mình sẽ nhờ người phụ trách liên hệ lại để hỗ trợ bạn sớm nhất.",
+    "allowed_action": "escalate",
+    "requires_human": true
+  },
+  {
+    "topic": "discount_private",
+    "risk_level": "medium",
+    "public_answer": "Về ưu đãi riêng thì tụi mình sẽ nhờ tư vấn viên xem giúp bạn nha. Bạn để lại Tên + SĐT giúp tụi mình nhé.",
+    "allowed_action": "escalate",
+    "requires_human": true
+  }
+]

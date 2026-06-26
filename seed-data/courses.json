@@ -1,0 +1,35 @@
+[
+  {
+    "slug": "phat-am-plus",
+    "name": "Phát âm plus (Phát âm chuyên sâu)",
+    "helps_with": "Nắm vững 44 âm IPA; nắn chỉnh phát âm giọng Anh–Mỹ; nối/nuốt/giảm âm; đọc âm đuôi -s/es, -ed; mở rộng ý tưởng khi nói. Bổ trợ Speaking (phát âm) và Listening.",
+    "good_for": "Bạn đã biết tiếng Anh căn bản, muốn người nghe hiểu rõ điều mình nói, muốn sửa các lỗi phát âm cũ. Đầu vào: bài test >= 10.",
+    "entry_level": "Bài test đầu vào >= 10",
+    "curriculum": "44 âm IPA; nối-nuốt-giảm âm; âm đuôi -s/es,-ed; mở rộng ý tưởng. Bài tập: nắn chỉnh phát âm từ-câu-đoạn, role-play, dictation, shadowing & dubbing.",
+    "formats": "Online; Kèm 1-1",
+    "promo": "Giảm 50k (học viên cũ học tiếp / có bạn học cùng / lớp OFF nhà xa >10km — chỉ lớp không có học phí ưu đãi). Affiliate 50k khi giới thiệu bạn.",
+    "reference_materials": "Slides: th sounds; 6 sibilant sounds."
+  },
+  {
+    "slug": "phat-am-giao-tiep",
+    "name": "Phát âm và Giao tiếp cơ bản",
+    "helps_with": "44 âm IPA; phát âm giọng Anh–Mỹ; mở rộng ý tưởng; luyện phản xạ giao tiếp, mạnh dạn và tự tin nói tiếng Anh. Bổ trợ Speaking & Listening.",
+    "good_for": "Bạn đã có nền ngữ pháp cơ bản; hiểu người khác nói nhưng chưa phản xạ được; muốn cải thiện phát âm + luyện giao tiếp. Đầu vào: IELTS >=5.0 / TOEIC >=650 / điểm trường >7 / bài test >=15.",
+    "entry_level": "IELTS >=5.0 | TOEIC >=650 | test đầu vào >=15",
+    "curriculum": "3 giai đoạn (~4 tháng): GĐ1 Nền tảng IPA + chủ đề cơ bản (~1.5 tháng); GĐ2 nối/giảm/nuốt âm, shadowing, dictation, chủ đề giao tiếp (~1.5 tháng); GĐ3 Vlog tiếng Anh + thuyết trình (~1 tháng). Bài tập: short clip 1-1, mind map, dictation, ghi âm, vlog, thuyết trình.",
+    "formats": "Online/Offline; Video record; Kèm 1-1",
+    "promo": "Giảm 50k (như trên). Affiliate 50k.",
+    "reference_materials": "Slides: th sounds; chủ đề Appearance; từ vựng tổng quan."
+  },
+  {
+    "slug": "ngu-phap-can-ban",
+    "name": "Ngữ pháp căn bản",
+    "helps_with": "Nắm vững từ loại, thành phần câu, 6 thì cơ bản, các dạng động từ, các mẫu câu quan trọng. Bổ trợ chính cho Writing.",
+    "good_for": "Bạn đã tiếp xúc tiếng Anh nhưng chưa chắc/mất gốc; hiểu từ vựng cơ bản; chưa biết hình thành câu, vị trí từ loại, cách dùng thì. Đầu vào: IELTS <=4.0 / TOEIC <=400 / điểm trường <=5 / bài test <=10.",
+    "entry_level": "IELTS <=4.0 | TOEIC <=400 | test đầu vào <=10",
+    "curriculum": "Từ loại; thành phần câu; 6 thì cơ bản; dạng động từ (V-inf, to-inf, gerund); các dạng câu (so sánh, điều kiện, bị động, tường thuật, mệnh đề quan hệ, câu hỏi đuôi). Bài tập: GG form ôn tập, viết/dịch câu-đoạn, list từ vựng A1-A2.",
+    "formats": "Online; Offline; Kèm 1-1",
+    "promo": "Giảm 50k (như trên). Affiliate 50k.",
+    "reference_materials": "Slides + handout Danh từ; từ vựng tổng quan."
+  }
+]
