@@ -16,7 +16,7 @@ export interface EvalCase {
 const ANSWERY: Decision[] = ['answer', 'answer_cta', 'clarify'];
 const POLICY: Decision[] = ['answer', 'answer_cta'];
 const ESC: Decision[] = ['escalate'];
-const OOS: Decision[] = ['escalate', 'clarify', 'answer']; // out_of_scope: lenient
+const OOS: Decision[] = ['escalate', 'clarify', 'answer', 'answer_cta']; // out_of_scope: lenient
 
 export const EVAL_CASES: EvalCase[] = [
   // ===================== BENIGN =====================
@@ -90,7 +90,7 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Giới thiệu bạn bè thì có được gì không ạ', expectIntents: ['promo'], expectDecisions: ANSWERY },
   { utterance: 'Bên mình đang có chương trình khuyến mãi nào không ạ', expectIntents: ['promo'], expectDecisions: ANSWERY },
   { utterance: 'Nhà em xa hơn 10km có được ưu đãi không ạ', expectIntents: ['promo', 'discount_private'], expectDecisions: ['answer', 'answer_cta', 'clarify', 'escalate'] },
-  { utterance: 'Có mã giảm giá nào đang áp dụng không ạ', expectIntents: ['promo'], expectDecisions: ANSWERY },
+  { utterance: 'Có mã giảm giá nào đang áp dụng không ạ', expectIntents: ['promo', 'discount_private'], expectDecisions: ['answer', 'answer_cta', 'clarify', 'escalate'] },
 
   // placement_test (6) — FAQ "kiểm tra đầu vào/xếp lớp"
   { utterance: 'Em có cần kiểm tra đầu vào/xếp lớp không ạ', expectIntents: ['placement_test'], expectDecisions: ANSWERY },

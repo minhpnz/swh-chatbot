@@ -6,6 +6,7 @@ import { createLlmClient } from '@/swh/llm';
 import { loadKnowledgeBaseFromFiles } from '@/swh/kb-memory';
 import { classifyMessage } from '@/swh/classify';
 import { policyGate } from '@/swh/policy';
+import { detectHighRisk } from '@/swh/safety';
 import { EVAL_CASES } from '@/swh/eval-data';
 import type { Classification, LlmClient } from '@/swh/types';
 
@@ -52,12 +53,15 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
       const lines: string[] = [];
 
       for (const c of EVAL_CASES) {
-        const cls = await classifyOrSkip(c.utterance, llm);
-        if (!cls) {
+        const raw = await classifyOrSkip(c.utterance, llm);
+        if (!raw) {
           skipped.push(c.utterance);
           continue;
         }
         ran++;
+        // Mirror the pipeline: apply the deterministic high-risk safety net.
+        const forced = detectHighRisk(c.utterance);
+        const cls = forced ? { ...raw, intent: forced } : raw;
         const policy = policyGate(cls, kb.policies, { alreadyClarified: false });
         const intentOk = c.expectIntents.includes(cls.intent);
         const decisionOk = c.expectDecisions.includes(policy.decision);
