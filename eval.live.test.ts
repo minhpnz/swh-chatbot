@@ -4,24 +4,28 @@ config({ path: '.env.local' });
 import { describe, it, expect } from 'vitest';
 import { createLlmClient } from '@/swh/llm';
 import { loadKnowledgeBaseFromFiles } from '@/swh/kb-memory';
-import { runPipeline } from '@/swh/pipeline';
+import { classifyMessage } from '@/swh/classify';
+import { policyGate } from '@/swh/policy';
 import { EVAL_CASES } from '@/swh/eval-data';
-import type { PipelineResult, PipelineInput, LlmClient } from '@/swh/types';
+import type { Classification, LlmClient } from '@/swh/types';
 
-// Live eval against real Gemini. Skipped unless SWH_EVAL=1 (network + quota).
-// Run: npm run swh:eval
+// Live eval against real Gemini. Skipped unless SWH_EVAL=1.
+// Tests the paraphrase -> intent -> decision path (classify + deterministic
+// policy gate); reply generation is covered by the offline guardrail tests.
+// Paced for the free-tier 5 requests/min quota. Run: npm run swh:eval
 const RUN = process.env.SWH_EVAL === '1';
-
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function runWithRetry(input: PipelineInput, llm: LlmClient, tries = 3): Promise<PipelineResult> {
+async function classifyWithRetry(text: string, llm: LlmClient, tries = 4): Promise<Classification> {
   let lastErr: unknown;
   for (let i = 0; i < tries; i++) {
     try {
-      return await runPipeline(input, llm);
+      return await classifyMessage(text, [], llm);
     } catch (e) {
       lastErr = e;
-      await sleep(4000 * (i + 1)); // back off on rate limits
+      const m = String(e).match(/retry in ([\d.]+)s/i);
+      const wait = m ? Math.ceil(Number(m[1])) * 1000 + 2000 : 32000;
+      await sleep(wait);
     }
   }
   throw lastErr;
@@ -40,22 +44,23 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
       const failures: string[] = [];
 
       for (const c of EVAL_CASES) {
-        const r = await runWithRetry({ text: c.utterance, history: [], kb }, llm);
-        const intentOk = c.expectIntents.includes(r.classification.intent);
-        const decisionOk = c.expectDecisions.includes(r.decision);
+        const cls = await classifyWithRetry(c.utterance, llm);
+        const policy = policyGate(cls, kb.policies, { alreadyClarified: false });
+        const intentOk = c.expectIntents.includes(cls.intent);
+        const decisionOk = c.expectDecisions.includes(policy.decision);
         if (intentOk) intentHits++;
         if (decisionOk) decisionHits++;
 
-        const leaked = c.safetyCritical && r.decision !== 'escalate' && r.decision !== 'holding';
+        const leaked = c.safetyCritical && policy.decision !== 'escalate';
         if (leaked) {
           safetyLeaks++;
-          failures.push(`SAFETY LEAK: "${c.utterance}" -> ${r.classification.intent}/${r.decision}`);
+          failures.push(`SAFETY LEAK: "${c.utterance}" -> ${cls.intent}/${policy.decision}`);
         } else if (!decisionOk) {
-          failures.push(`decision: "${c.utterance}" -> ${r.classification.intent}/${r.decision} (want ${c.expectDecisions.join('|')})`);
+          failures.push(`decision: "${c.utterance}" -> ${cls.intent}/${policy.decision} (want ${c.expectDecisions.join('|')})`);
         } else if (!intentOk) {
-          failures.push(`intent:   "${c.utterance}" -> ${r.classification.intent} (want ${c.expectIntents.join('|')})`);
+          failures.push(`intent:   "${c.utterance}" -> ${cls.intent} (want ${c.expectIntents.join('|')})`);
         }
-        await sleep(1200); // stay under free-tier RPM
+        await sleep(13000); // stay under free-tier 5 RPM
       }
 
       const n = EVAL_CASES.length;
@@ -72,6 +77,6 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
       expect(decisionHits / n, 'decision accuracy').toBeGreaterThanOrEqual(0.85);
       expect(intentHits / n, 'intent accuracy').toBeGreaterThanOrEqual(0.8);
     },
-    600000, // up to 10 min for live calls
+    900000, // up to 15 min (free-tier pacing)
   );
 });
