@@ -1,9 +1,7 @@
 import { config } from 'dotenv';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import Papa from 'papaparse';
 import { createClient } from '@supabase/supabase-js';
-import type { Course, Faq, PolicyRow, Asset } from './types';
+import type { Course, PolicyRow, Asset } from './types';
+import { loadJson, parseFaqs } from './kb-memory';
 
 config({ path: '.env.local' });
 
@@ -12,26 +10,6 @@ function admin() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('Missing Supabase env vars (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)');
   return createClient(url, key);
-}
-
-function loadJson<T>(file: string): T {
-  return JSON.parse(readFileSync(resolve('swh/seed-data', file), 'utf8')) as T;
-}
-
-function parseFaqs(): Faq[] {
-  const csv = readFileSync(resolve('swh/seed-data/faq.csv'), 'utf8');
-  const { data } = Papa.parse<string[]>(csv, { skipEmptyLines: true });
-  const rows = data.slice(1); // drop header
-  return rows
-    .filter((r) => (r[0] ?? '').trim() && (r[3] ?? '').trim())
-    .map((r) => ({
-      intent_group: (r[0] ?? '').trim(),
-      representative_q: (r[1] ?? '').trim(),
-      variants: (r[2] ?? '')
-        .split('\n').map((v) => v.replace(/^[-•\s]+/, '').trim()).filter(Boolean),
-      answer: (r[3] ?? '').trim(),
-      attachment: (r[4] ?? '').trim() || undefined,
-    }));
 }
 
 async function main() {
