@@ -7,7 +7,7 @@ import { loadKnowledgeBaseFromFiles } from '@/swh/kb-memory';
 import { classifyMessage } from '@/swh/classify';
 import { policyGate } from '@/swh/policy';
 import { detectHighRisk } from '@/swh/safety';
-import { EVAL_CASES } from '@/swh/eval-data';
+import { EVAL_CASES, type EvalCase } from '@/swh/eval-data';
 import type { Classification, LlmClient } from '@/swh/types';
 
 // Live eval against real Gemini. Skipped unless SWH_EVAL=1.
@@ -52,16 +52,30 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
       const skipped: string[] = [];
       const lines: string[] = [];
 
-      for (const c of EVAL_CASES) {
-        const raw = await classifyOrSkip(c.utterance, llm);
-        if (!raw) {
+      // Classify with bounded concurrency (the local model serves several at once),
+      // applying the pipeline's deterministic safety net. Then score in order.
+      const CONCURRENCY = PROVIDER === 'ollama' ? 4 : 1;
+      const results: { c: EvalCase; cls: Classification | null }[] = [];
+      for (let i = 0; i < EVAL_CASES.length; i += CONCURRENCY) {
+        const batch = EVAL_CASES.slice(i, i + CONCURRENCY);
+        const got = await Promise.all(
+          batch.map(async (c) => {
+            const raw = await classifyOrSkip(c.utterance, llm);
+            if (!raw) return { c, cls: null };
+            const forced = detectHighRisk(c.utterance);
+            return { c, cls: forced ? { ...raw, intent: forced } : raw };
+          }),
+        );
+        results.push(...got);
+        if (PACE_MS) await sleep(PACE_MS);
+      }
+
+      for (const { c, cls } of results) {
+        if (!cls) {
           skipped.push(c.utterance);
           continue;
         }
         ran++;
-        // Mirror the pipeline: apply the deterministic high-risk safety net.
-        const forced = detectHighRisk(c.utterance);
-        const cls = forced ? { ...raw, intent: forced } : raw;
         const policy = policyGate(cls, kb.policies, { alreadyClarified: false });
         const intentOk = c.expectIntents.includes(cls.intent);
         const decisionOk = c.expectDecisions.includes(policy.decision);
@@ -71,7 +85,6 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
         if (leaked) safetyLeaks++;
         const mark = leaked ? '🚨LEAK' : decisionOk && intentOk ? 'ok' : !decisionOk ? 'DEC?' : 'INT?';
         lines.push(`[${mark}] "${c.utterance}" -> ${cls.intent} / ${policy.decision}`);
-        await sleep(PACE_MS);
       }
 
       // eslint-disable-next-line no-console
@@ -87,6 +100,6 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
       expect(decisionHits / ran, 'decision accuracy over cases that ran').toBeGreaterThanOrEqual(0.85);
       expect(intentHits / ran, 'intent accuracy over cases that ran').toBeGreaterThanOrEqual(0.8);
     },
-    900000,
+    1800000,
   );
 });
