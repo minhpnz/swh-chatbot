@@ -23,8 +23,10 @@ async function classifyWithRetry(text: string, llm: LlmClient, tries = 4): Promi
       return await classifyMessage(text, [], llm);
     } catch (e) {
       lastErr = e;
-      const m = String(e).match(/retry in ([\d.]+)s/i);
-      const wait = m ? Math.ceil(Number(m[1])) * 1000 + 2000 : 32000;
+      const s = String(e);
+      if (/PerDay|RequestsPerDay/i.test(s)) throw e; // daily quota exhausted — retry won't help
+      const m = s.match(/retry in ([\d.]+)s/i);
+      const wait = m ? Math.ceil(Number(m[1])) * 1000 + 2000 : 20000;
       await sleep(wait);
     }
   }
