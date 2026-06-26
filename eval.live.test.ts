@@ -18,17 +18,19 @@ const RUN = process.env.SWH_EVAL === '1';
 const MIN_RAN = Number(process.env.SWH_EVAL_MIN_RAN ?? '5');
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// Returns a classification, or null if rate-limited after one retry.
+// Returns a classification, or null if it fails / hangs within 20s.
+// (The Gemini SDK retries 429s internally for ~1 min, so we cap with a race.)
 async function classifyOrSkip(text: string, llm: LlmClient): Promise<Classification | null> {
-  for (let i = 0; i < 2; i++) {
-    try {
-      return await classifyMessage(text, [], llm);
-    } catch (e) {
-      if (!/429|quota/i.test(String(e))) throw e;
-      if (i === 0) await sleep(13000); // one retry for a per-minute blip
-    }
+  const p = classifyMessage(text, [], llm);
+  p.catch(() => {}); // swallow if we abandon it via timeout
+  try {
+    return await Promise.race([
+      p,
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000)),
+    ]);
+  } catch {
+    return null; // quota-blocked or timed out
   }
-  return null; // quota-blocked
 }
 
 describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
