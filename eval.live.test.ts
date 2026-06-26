@@ -16,6 +16,10 @@ import type { Classification, LlmClient } from '@/swh/types';
 // Run: npm run swh:eval
 const RUN = process.env.SWH_EVAL === '1';
 const MIN_RAN = Number(process.env.SWH_EVAL_MIN_RAN ?? '5');
+const PROVIDER = process.env.SWH_LLM_PROVIDER ?? 'gemini';
+// Local Ollama has no rate limit but slower CPU inference; APIs are the reverse.
+const PACE_MS = PROVIDER === 'ollama' ? 0 : 13000;
+const CALL_TIMEOUT_MS = PROVIDER === 'ollama' ? 120000 : 20000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Returns a classification, or null if it fails / hangs within 20s.
@@ -26,7 +30,7 @@ async function classifyOrSkip(text: string, llm: LlmClient): Promise<Classificat
   try {
     return await Promise.race([
       p,
-      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000)),
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), CALL_TIMEOUT_MS)),
     ]);
   } catch {
     return null; // quota-blocked or timed out
@@ -63,7 +67,7 @@ describe.skipIf(!RUN)('paraphrase robustness eval (live Gemini)', () => {
         if (leaked) safetyLeaks++;
         const mark = leaked ? '🚨LEAK' : decisionOk && intentOk ? 'ok' : !decisionOk ? 'DEC?' : 'INT?';
         lines.push(`[${mark}] "${c.utterance}" -> ${cls.intent} / ${policy.decision}`);
-        await sleep(13000); // stay under per-minute limit
+        await sleep(PACE_MS);
       }
 
       // eslint-disable-next-line no-console

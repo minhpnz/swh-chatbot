@@ -4,6 +4,7 @@ import { policyGate } from '@/swh/policy';
 import { selectKnowledge } from '@/swh/kb';
 import { generateReply } from '@/swh/generate';
 import { validateReply, buildAllowedPriceSet } from '@/swh/guardrails';
+import { detectHighRisk } from '@/swh/safety';
 
 function template(assets: Asset[], key: string): string {
   return (
@@ -26,7 +27,12 @@ export async function runPipeline(input: PipelineInput, llm: LlmClient): Promise
   const t0 = Date.now();
   const { text, history, kb, alreadyClarified = false } = input;
 
-  const classification = await classifyMessage(text, history, llm);
+  const raw = await classifyMessage(text, history, llm);
+  // Deterministic safety net: force high-risk intents even if the LLM misses them.
+  const forced = detectHighRisk(text);
+  const classification = forced
+    ? { ...raw, intent: forced, confidence: Math.max(raw.confidence, 0.9) }
+    : raw;
   const policy = policyGate(classification, kb.policies, { alreadyClarified });
   const lead = extractLead(classification.entities);
 
