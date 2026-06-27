@@ -92,7 +92,7 @@ export function ChatWidget() {
   }
 
   return (
-    <div className="mx-auto flex h-[100dvh] max-w-2xl flex-col bg-gradient-to-b from-rose-50/60 via-white to-white">
+    <div className="mx-auto flex h-[100dvh] max-w-2xl flex-col bg-gradient-to-b from-rose-50/60 via-white to-white text-gray-900">
       {/* Header */}
       <header className="flex items-center gap-3 border-b border-rose-100 bg-white/80 px-4 py-3 backdrop-blur-md">
         <NomadLogo className="h-10 w-10 shrink-0 ring-1 ring-rose-100" />
@@ -129,7 +129,7 @@ export function ChatWidget() {
       <div className="border-t border-rose-100 bg-white/90 p-3 backdrop-blur-md">
         <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-4 pr-1.5 shadow-sm transition focus-within:border-pink-400 focus-within:ring-2 focus-within:ring-pink-100">
           <input
-            className="flex-1 bg-transparent text-[15px] outline-none placeholder:text-gray-400"
+            className="flex-1 bg-transparent text-[15px] text-gray-900 outline-none placeholder:text-gray-400"
             placeholder="Nhập tin nhắn…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
