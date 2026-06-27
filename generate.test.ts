@@ -21,7 +21,10 @@ describe('buildGeneratePrompt', () => {
   });
 
   it('tells the model to ask exactly one question when clarifying', () => {
-    expect(buildGeneratePrompt(sel, 'clarify' as Decision, [])).toContain('đúng 1 câu');
+    const p = buildGeneratePrompt(sel, 'clarify' as Decision, []);
+    expect(p).toContain('đúng 1 câu');
+    expect(p).toContain('bạn nói rõ hơn một chút được không ạ?');
+    expect(p).toContain('đừng xin SĐT');
   });
 
   it('renders matched teacher names, their current class and tuition', () => {

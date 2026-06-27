@@ -43,7 +43,10 @@ describe('policyGate', () => {
     expect(r.requires_human).toBe(false);
   });
 
-  it('answers casual out_of_scope instead of creating a handoff case', () => {
+  it('clarifies casual out_of_scope once before answering', () => {
+    const first = policyGate(C('out_of_scope'), policies, { alreadyClarified: false, casualFallback: true });
+    expect(first.decision).toBe('clarify');
+
     const r = policyGate(C('out_of_scope'), policies, { alreadyClarified: true, casualFallback: true });
     expect(r.decision).toBe('answer');
     expect(r.requires_human).toBe(false);
@@ -59,7 +62,10 @@ describe('policyGate', () => {
     expect(policyGate(C('unknown', 0.2), policies, { alreadyClarified: false }).decision).toBe('clarify');
   });
 
-  it('answers casual low-confidence fallback instead of escalating', () => {
+  it('clarifies casual low-confidence fallback once before answering', () => {
+    const first = policyGate(C('unknown', 0.2), policies, { alreadyClarified: false, casualFallback: true });
+    expect(first.decision).toBe('clarify');
+
     const r = policyGate(C('unknown', 0.2), policies, { alreadyClarified: true, casualFallback: true });
     expect(r.decision).toBe('answer');
     expect(r.requires_human).toBe(false);

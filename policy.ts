@@ -26,7 +26,9 @@ export function policyGate(
 
   if (c.intent === 'out_of_scope') {
     if (opts.casualFallback) {
-      return { decision: 'answer', risk_level: 'low', requires_human: false };
+      return opts.alreadyClarified
+        ? { decision: 'answer', risk_level: 'low', requires_human: false }
+        : { decision: 'clarify', risk_level: 'low', requires_human: false };
     }
     if (opts.alreadyClarified) {
       return {
@@ -40,7 +42,9 @@ export function policyGate(
   // 3) Unknown / low confidence -> clarify once, then escalate.
   if (c.intent === 'unknown' || c.confidence < CONFIDENCE_THRESHOLD) {
     if (opts.casualFallback) {
-      return { decision: 'answer', risk_level: 'low', requires_human: false };
+      return opts.alreadyClarified
+        ? { decision: 'answer', risk_level: 'low', requires_human: false }
+        : { decision: 'clarify', risk_level: 'low', requires_human: false };
     }
     if (opts.alreadyClarified) {
       return {

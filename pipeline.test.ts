@@ -119,6 +119,28 @@ describe('runPipeline', () => {
     expect(r.escalation).toBeUndefined();
   });
 
+  it('asks for more information once for unclear casual questions before answering', async () => {
+    const llm = fakeLlm(
+      { intent: 'unknown', entities: {}, confidence: 0.2 },
+      'Bạn nói rõ hơn một chút được không ạ?',
+    );
+    const r = await runPipeline({ text: 'cái đó sao vậy ạ', history: [], kb, alreadyClarified: false }, llm);
+    expect(r.decision).toBe('clarify');
+    expect(r.escalation).toBeUndefined();
+    expect(r.reply).toContain('rõ hơn');
+    expect(r.reply).not.toMatch(/SĐT|liên hệ lại/u);
+  });
+
+  it('answers casual unclear questions after the one clarification has already happened', async () => {
+    const llm = fakeLlm(
+      { intent: 'unknown', entities: {}, confidence: 0.2 },
+      'Em cũng không biết nữa hehe.',
+    );
+    const r = await runPipeline({ text: 'ý là gu nhạc của Hằng á', history: [], kb, alreadyClarified: true }, llm);
+    expect(r.decision).toBe('answer');
+    expect(r.escalation).toBeUndefined();
+  });
+
   it.each([
     ['chị Hằng quê ở đâu vậy ạ, em hỏi chuyện ngoài lề thôi'],
     ['ngoài giờ dạy chị Hằng có hay livestream không ta?'],
@@ -142,6 +164,16 @@ describe('runPipeline', () => {
     expect(r.decision).toBe('escalate');
     expect(r.reply).not.toContain('SHOULD_NOT_APPEAR');
     expect(r.escalation?.reason).toBe('low_confidence');
+  });
+
+  it('asks for more information once for unclear critical topics before escalation', async () => {
+    const llm = fakeLlm(
+      { intent: 'unknown', entities: {}, confidence: 0.2 },
+      'Bạn nói rõ hơn một chút được không ạ?',
+    );
+    const r = await runPipeline({ text: 'quy định lớp đó sao ạ', history: [], kb, alreadyClarified: false }, llm);
+    expect(r.decision).toBe('clarify');
+    expect(r.escalation).toBeUndefined();
   });
 
   it.each([

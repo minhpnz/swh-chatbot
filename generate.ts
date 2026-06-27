@@ -4,7 +4,7 @@ import { SWH_PERSONA, SWH_FACTS } from '@/swh/persona';
 function actionDirective(decision: Decision): string {
   switch (decision) {
     case 'clarify':
-      return 'Khách chưa rõ nhu cầu — hỏi lại đúng 1 câu ngắn gọn để làm rõ, đừng tư vấn dài.';
+      return 'Khách chưa rõ nhu cầu hoặc thiếu dữ kiện — hỏi lại đúng 1 câu ngắn gọn để làm rõ, ưu tiên kiểu "bạn nói rõ hơn một chút được không ạ?", đừng tư vấn dài, đừng xin SĐT.';
     case 'answer_cta':
       return 'Trả lời ngắn gọn rồi mời khách để lại Tên + SĐT và/hoặc gửi form phù hợp đã cung cấp.';
     default:
