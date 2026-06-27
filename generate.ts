@@ -12,17 +12,35 @@ function actionDirective(decision: Decision): string {
   }
 }
 
+function renderTeacher(t: SelectedKnowledge['teachers'][number]): string {
+  const head = `• ${t.name}${t.tag ? ` (${t.tag})` : ''}${t.role ? ` — ${t.role}` : ''}`;
+  if (t.classes.length === 0) {
+    const teaches = t.teaches.length ? ` Phụ trách: ${t.teaches.join(', ')}.` : '';
+    return `${head}: hiện chưa có lớp đang mở ghi danh.${teaches}`;
+  }
+  const classes = t.classes
+    .map((cl) => `   - ${cl.course} (mã ${cl.code})`
+      + [cl.start && `, khai giảng ${cl.start}`, cl.time && `, ${cl.time}`, cl.days && ` (T${cl.days})`,
+         cl.duration && `, ${cl.duration}`, cl.size && `, sĩ số ${cl.size}`,
+         cl.price && `, học phí ${cl.price}`, cl.format && `, ${cl.format}`]
+        .filter(Boolean).join(''))
+    .join('\n');
+  return `${head} đang dạy:\n${classes}`;
+}
+
 export function buildGeneratePrompt(sel: SelectedKnowledge, decision: Decision, allowedLinks: string[]): string {
   const courses = sel.courses
     .map((c) => `• ${c.name}: ${[c.helps_with, c.good_for, c.entry_level, c.formats, c.promo].filter((x): x is string => Boolean(x)).join(' | ')}`)
     .join('\n');
   const faqs = sel.faqs.map((f) => `Q: ${f.representative_q}\nA: ${f.answer}`).join('\n\n');
   const policies = sel.policies.map((p) => `• ${p.topic}: ${p.public_answer}`).join('\n');
+  const teachers = sel.teachers.map(renderTeacher).join('\n');
 
   return [
     SWH_PERSONA,
     SWH_FACTS,
     courses ? `KHOÁ HỌC LIÊN QUAN:\n${courses}` : '',
+    teachers ? `GIÁO VIÊN & LỚP ĐANG MỞ (chỉ dùng đúng dữ liệu này, kèm link hồ sơ GV nếu có để khách xem profile + video record):\n${teachers}` : '',
     faqs ? `CÂU TRẢ LỜI MẪU (ưu tiên dùng gần đúng, giữ nguyên ý + tone):\n${faqs}` : '',
     policies ? `CHÍNH SÁCH ĐƯỢC PHÉP NÓI:\n${policies}` : '',
     allowedLinks.length ? `CHỈ ĐƯỢC DÙNG CÁC LINK SAU (nếu cần):\n${allowedLinks.join('\n')}` : 'KHÔNG được chèn link nào.',

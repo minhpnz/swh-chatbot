@@ -1,5 +1,5 @@
 import type {
-  Classification, Course, PolicyRow, KnowledgeBase, SelectedKnowledge,
+  Classification, Course, PolicyRow, Teacher, KnowledgeBase, SelectedKnowledge,
 } from '@/swh/types';
 
 const STOP = new Set([
@@ -16,6 +16,28 @@ function overlap(a: string[], b: Set<string>): number {
 const ALL_COURSE_INTENTS = new Set<string>([
   'ask_price', 'ask_schedule', 'class_info', 'course_consulting', 'placement_test', 'trial_class', 'promo',
 ]);
+
+// Vietnamese teacher titles that precede a name ("cô Dung", "Miss Lym", "giáo viên Quỳnh").
+const TEACHER_TITLE = '(?:cô|thầy|miss|mr|ms|gv|cô giáo|thầy giáo|giáo viên|trợ giảng)';
+
+// Match teachers referenced in a message — by the classifier's teacher_name entity,
+// by full name appearing in the text, or by a titled given/family name token.
+function matchTeachers(text: string, teacherName: string | undefined, teachers: Teacher[]): Teacher[] {
+  const hay = ` ${text.toLowerCase()} `;
+  const needle = teacherName?.toLowerCase().trim();
+  const needleToks = needle ? needle.split(/\s+/).filter((p) => p.length > 1) : [];
+  return teachers.filter((t) => {
+    const full = t.name.toLowerCase();
+    if (needle && (full.includes(needle) || needle.includes(full))) return true;
+    if (hay.includes(full)) return true;
+    const toks = full.split(/\s+/).filter((p) => p.length > 1);
+    return toks.some(
+      (p) =>
+        needleToks.includes(p) ||
+        new RegExp(`${TEACHER_TITLE}\\s+(?:[\\p{L}]+\\s+)?${p}(?![\\p{L}])`, 'u').test(hay),
+    );
+  });
+}
 
 export function selectKnowledge(c: Classification, text: string, kb: KnowledgeBase): SelectedKnowledge {
   const refs: string[] = [];
@@ -56,5 +78,15 @@ export function selectKnowledge(c: Classification, text: string, kb: KnowledgeBa
   }
   policies.forEach((p) => refs.push(`policy:${p.topic}`));
 
-  return { courses, faqs, policies, refs };
+  // Teachers: match by name; for teacher_info with no specific name, return all.
+  const allTeachers = kb.teachers ?? [];
+  let teachers: Teacher[] = matchTeachers(text, c.entities.teacher_name, allTeachers);
+  if (c.intent === 'teacher_info' && teachers.length === 0) teachers = allTeachers;
+  teachers.forEach((t) => refs.push(`teacher:${t.name}`));
+  if (c.intent === 'teacher_info' || teachers.length > 0) {
+    const link = kb.assets.find((a) => a.key === 'link_teacher_info');
+    if (link) refs.push(`asset:${link.key}`);
+  }
+
+  return { courses, faqs, policies, teachers, refs };
 }

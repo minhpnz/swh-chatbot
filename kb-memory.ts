@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import Papa from 'papaparse';
-import type { Course, Faq, PolicyRow, Asset, KnowledgeBase } from './types';
+import type { Course, Faq, PolicyRow, Asset, Teacher, KnowledgeBase } from './types';
 
 // In-memory KB loaded straight from the seed-data files (no Supabase).
 // Used by the seed script and the live paraphrase eval.
@@ -30,6 +30,7 @@ export function loadKnowledgeBaseFromFiles(): KnowledgeBase {
     courses: loadJson<Course[]>('courses.json'),
     policies: loadJson<PolicyRow[]>('policies.json'),
     assets: loadJson<Asset[]>('assets.json'),
+    teachers: loadJson<Teacher[]>('teachers.json'),
     faqs: parseFaqs(),
   };
 }

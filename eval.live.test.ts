@@ -18,8 +18,9 @@ import type { Classification, LlmClient } from '@/swh/types';
 const RUN = process.env.SWH_EVAL === '1';
 const MIN_RAN = Number(process.env.SWH_EVAL_MIN_RAN ?? '5');
 const PROVIDER = process.env.SWH_LLM_PROVIDER ?? 'gemini';
-// Local Ollama has no rate limit but slower CPU inference; APIs are the reverse.
-const PACE_MS = PROVIDER === 'ollama' ? 0 : 13000;
+// Local Ollama: no rate limit, slow CPU inference. Groq: fast, ~30 req/min free.
+// Gemini free-tier: strict 20/day, needs heavy pacing.
+const PACE_MS = PROVIDER === 'ollama' ? 0 : PROVIDER === 'groq' ? 2200 : 13000;
 const CALL_TIMEOUT_MS = PROVIDER === 'ollama' ? 120000 : 20000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

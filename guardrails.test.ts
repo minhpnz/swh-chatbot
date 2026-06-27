@@ -33,11 +33,30 @@ describe('buildAllowedPriceSet', () => {
     const kb: KnowledgeBase = {
       courses: [{ slug: 's', name: 'n', promo: 'giảm 50k' }],
       faqs: [{ intent_group: 'g', representative_q: 'q', variants: [], answer: 'cọc 1.000.000đ' }],
-      policies: [], assets: [],
+      policies: [], assets: [], teachers: [],
     };
     const set = buildAllowedPriceSet(kb);
     expect(set.has('50000')).toBe(true);
     expect(set.has('1000000')).toBe(true);
+  });
+
+  it('collects prices from teacher class data (so real tuition is not flagged)', () => {
+    const kb: KnowledgeBase = {
+      courses: [], faqs: [], policies: [], assets: [],
+      teachers: [
+        {
+          name: 'Anh Thư', teaches: ['Phát âm & Giao tiếp'],
+          classes: [
+            { code: 'OFFT3', course: 'Giao tiếp', price: '8.300.000đ' },
+            { code: 'PROT2', course: 'PRO Giao tiếp', price: '14.490.000đ (+290.000đ/buổi)' },
+          ],
+        },
+      ],
+    };
+    const set = buildAllowedPriceSet(kb);
+    expect(set.has('8300000')).toBe(true);
+    expect(set.has('14490000')).toBe(true);
+    expect(set.has('290000')).toBe(true);
   });
 });
 

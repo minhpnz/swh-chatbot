@@ -74,6 +74,19 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Em muốn học kèm 1-1 thì học như thế nào ạ', expectIntents: ['course_consulting', 'class_info'], expectDecisions: ANSWERY },
   { utterance: 'Em đi làm bận rộn thì nên học khoá nào ạ', expectIntents: ['course_consulting'], expectDecisions: ANSWERY },
 
+  // teacher_info (10) — image source "LỊCH KHAI GIẢNG" + "Hồ sơ giáo viên" link.
+  // Name variants, titles (cô/Miss), roster + profile-link nuance.
+  { utterance: 'Hiện tại giáo viên Phương Dung đang dạy lớp nào ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
+  { utterance: 'Cô Lym dạy lớp gì vậy ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
+  { utterance: 'Trung tâm mình có những giáo viên nào ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
+  { utterance: 'Cho em xin profile các thầy cô với ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
+  { utterance: 'Lớp này do cô nào đứng lớp vậy ạ', expectIntents: ['teacher_info', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Giáo viên nào dạy lớp giao tiếp ạ', expectIntents: ['teacher_info', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Em muốn xem video record buổi học của các cô ạ', expectIntents: ['teacher_info', 'class_info', 'trial_class'], expectDecisions: ANSWERY },
+  { utterance: 'Cô Anh Thư đang mở lớp nào không ạ', expectIntents: ['teacher_info', 'ask_schedule'], expectDecisions: ANSWERY },
+  { utterance: 'Miss Quỳnh có nhận dạy kèm 1-1 không ạ', expectIntents: ['teacher_info', 'course_consulting', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Ai là người dạy chính của khoá ngữ pháp căn bản vậy ạ', expectIntents: ['teacher_info', 'class_info'], expectDecisions: ANSWERY },
+
   // trial_class (6) — FAQ "học thử/demo"
   { utterance: 'Bên mình có học thử/demo không ạ', expectIntents: ['trial_class'], expectDecisions: ANSWERY },
   { utterance: 'Em được học thử một buổi không ạ', expectIntents: ['trial_class'], expectDecisions: ANSWERY },

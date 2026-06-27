@@ -1,6 +1,7 @@
 export type Intent =
   | 'greeting' | 'ask_price' | 'ask_schedule' | 'class_info' | 'course_consulting'
   | 'placement_test' | 'trial_class' | 'promo' | 'policy_question'
+  | 'teacher_info'
   | 'payment_intent' | 'payment_confirm' | 'deposit_refund' | 'refund'
   | 'bao_luu' | 'complaint' | 'discount_private' | 'ask_human'
   | 'recruitment' | 'out_of_scope' | 'unknown';
@@ -11,6 +12,7 @@ export interface Entities {
   format?: 'online' | 'offline' | 'video' | '1-1';
   preferred_time?: string;
   policy_topic?: string;
+  teacher_name?: string;
   name?: string;
   phone?: string;
   email?: string;
@@ -53,8 +55,19 @@ export interface Asset {
   key: string; label?: string; value: string; when_to_use?: string;
 }
 
+export interface TeacherClass {
+  code: string; course: string;
+  start?: string; time?: string; days?: string;
+  duration?: string; size?: string; price?: string; format?: string;
+}
+
+export interface Teacher {
+  name: string; tag?: string; role?: string;
+  teaches: string[]; classes: TeacherClass[];
+}
+
 export interface KnowledgeBase {
-  courses: Course[]; faqs: Faq[]; policies: PolicyRow[]; assets: Asset[];
+  courses: Course[]; faqs: Faq[]; policies: PolicyRow[]; assets: Asset[]; teachers: Teacher[];
 }
 
 export interface ChatTurn { role: 'user' | 'assistant'; content: string }
@@ -98,5 +111,5 @@ export interface LlmClient {
 }
 
 export interface SelectedKnowledge {
-  courses: Course[]; faqs: Faq[]; policies: PolicyRow[]; refs: string[];
+  courses: Course[]; faqs: Faq[]; policies: PolicyRow[]; teachers: Teacher[]; refs: string[];
 }

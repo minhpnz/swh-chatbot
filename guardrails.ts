@@ -29,6 +29,7 @@ export function buildAllowedPriceSet(kb: KnowledgeBase): Set<string> {
     ...kb.faqs.map((f) => f.answer),
     ...kb.policies.map((p) => p.public_answer),
     ...kb.assets.map((a) => a.value),
+    ...(kb.teachers ?? []).flatMap((t) => t.classes.map((cl) => cl.price)),
   ].filter((x): x is string => Boolean(x)).join(' ');
   const set = new Set<string>();
   for (const tok of extractPriceMentions(blob)) {

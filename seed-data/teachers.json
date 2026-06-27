@@ -1,0 +1,188 @@
+[
+  {
+    "name": "Phương Dung",
+    "tag": "2k2",
+    "role": "Giáo viên",
+    "teaches": ["Lớp IPA chuyên sâu", "Phát âm & Giao tiếp", "Ngữ pháp căn bản"],
+    "classes": [
+      {
+        "code": "IPA+L2",
+        "course": "Lớp IPA chuyên sâu",
+        "start": "Thứ 4, 5/8",
+        "time": "18h30-20h00",
+        "days": "2,4,6",
+        "duration": "25 buổi (~2 tháng)",
+        "size": "16-18",
+        "price": "3.200.000đ",
+        "format": "ONL"
+      }
+    ]
+  },
+  {
+    "name": "Thanh Hằng",
+    "tag": "Founder",
+    "role": "Founder & Giáo viên",
+    "teaches": ["Phát âm & Giao tiếp"],
+    "classes": [
+      {
+        "code": "OMH19",
+        "course": "Lớp Giao tiếp Tiếng Anh & Phát âm IPA",
+        "start": "Thứ 3, 4/8",
+        "time": "19h00-20h30",
+        "days": "3,5,7",
+        "duration": "50 buổi (~4 tháng)",
+        "size": "12-14",
+        "price": "7.900.000đ",
+        "format": "ONL"
+      }
+    ]
+  },
+  {
+    "name": "Ánh Quỳnh",
+    "tag": "97",
+    "role": "Giáo viên",
+    "teaches": ["Phát âm & Giao tiếp", "Lớp IPA chuyên sâu", "Ngữ pháp căn bản"],
+    "classes": [
+      {
+        "code": "OMQ11",
+        "course": "Lớp Giao tiếp Tiếng Anh & Phát âm IPA",
+        "start": "Thứ 3, 11/8",
+        "time": "19h00-20h30",
+        "days": "3,5,7",
+        "duration": "~4 tháng",
+        "size": "12-14",
+        "price": "7.900.000đ",
+        "format": "ONL"
+      },
+      {
+        "code": "Kèm 1-1",
+        "course": "Kèm 1-1 (Miss Quỳnh)",
+        "duration": "9 buổi (1h/buổi)",
+        "price": "3.000.000đ",
+        "format": "ONL/OFF"
+      }
+    ]
+  },
+  {
+    "name": "Anh Thư",
+    "tag": "2k2",
+    "role": "Giáo viên",
+    "teaches": ["Phát âm & Giao tiếp"],
+    "classes": [
+      {
+        "code": "OFFT3",
+        "course": "Lớp Giao tiếp Tiếng Anh & Phát âm IPA",
+        "start": "Thứ 3, 11/8",
+        "time": "18h30-20h30",
+        "days": "3,5",
+        "duration": "38 buổi (~5 tháng)",
+        "size": "10-12",
+        "price": "8.300.000đ",
+        "format": "OFF"
+      },
+      {
+        "code": "ONLT9",
+        "course": "Lớp Giao tiếp Tiếng Anh & Phát âm IPA",
+        "start": "Thứ 2, 21/9",
+        "time": "20h45-22h15",
+        "days": "2,4,6",
+        "duration": "50 buổi (~4 tháng)",
+        "size": "18-20",
+        "price": "5.700.000đ",
+        "format": "ONL"
+      },
+      {
+        "code": "PROT2",
+        "course": "Lớp PRO Phát âm & Giao tiếp",
+        "start": "Khi đủ sĩ số",
+        "time": "9h30-11h00",
+        "days": "3,5,7",
+        "duration": "50 buổi (~4 tháng)",
+        "size": "4-6",
+        "price": "14.490.000đ (+290.000đ/buổi)",
+        "format": "ONL"
+      }
+    ]
+  },
+  {
+    "name": "Búp Loan",
+    "tag": "2k1",
+    "role": "Giáo viên",
+    "teaches": ["Phát âm & Giao tiếp"],
+    "classes": [
+      {
+        "code": "ONLB8",
+        "course": "Lớp Giao tiếp Tiếng Anh & Phát âm IPA",
+        "start": "Thứ 2, 14/9",
+        "time": "19h00-20h30",
+        "days": "2,4,6",
+        "duration": "50 buổi (~4 tháng)",
+        "size": "18-20",
+        "price": "5.700.000đ",
+        "format": "ONL"
+      }
+    ]
+  },
+  {
+    "name": "Lym Quỳnh",
+    "tag": "90",
+    "role": "Giáo viên",
+    "teaches": ["Ngữ pháp căn bản"],
+    "classes": [
+      {
+        "code": "GFL1",
+        "course": "Lớp Ngữ pháp căn bản",
+        "start": "Thứ 2, 20/7",
+        "time": "18h30-20h00",
+        "days": "2,4,6",
+        "duration": "50 buổi (~4 tháng)",
+        "size": "10-12",
+        "price": "7.900.000đ (ưu đãi lớp đầu, giá gốc 8.900.000đ)",
+        "format": "OFF"
+      },
+      {
+        "code": "GLL4",
+        "course": "Lớp Ngữ pháp căn bản",
+        "start": "Thứ 3, 4/8",
+        "time": "19h00-20h30",
+        "days": "3,5,7",
+        "duration": "50 buổi (~4 tháng)",
+        "size": "16-18",
+        "price": "6.900.000đ",
+        "format": "ONL"
+      },
+      {
+        "code": "PROGLL1",
+        "course": "Lớp PRO Ngữ pháp căn bản",
+        "start": "Khi đủ sĩ số",
+        "time": "9h15-11h00",
+        "days": "2,4,6",
+        "duration": "40 buổi (~3 tháng)",
+        "size": "4-6",
+        "price": "10.900.000đ (ưu đãi lớp đầu, giá gốc 11.900.000đ)",
+        "format": "ONL"
+      },
+      {
+        "code": "Kèm 1-1",
+        "course": "Kèm 1-1 (Miss Lym)",
+        "duration": "9 buổi (1h/buổi)",
+        "price": "3.000.000đ",
+        "format": "ONL/OFF"
+      }
+    ]
+  },
+  {
+    "name": "Thục Quyên",
+    "tag": "2k3",
+    "role": "Giáo viên",
+    "teaches": ["Phát âm & Giao tiếp", "Lớp IPA chuyên sâu"],
+    "classes": []
+  },
+  {
+    "name": "Ngọc Hân",
+    "tag": "2001",
+    "role": "Trợ giảng (TA)",
+    "teaches": ["Trợ giảng 2 lớp ONL"],
+    "classes": []
+  }
+]

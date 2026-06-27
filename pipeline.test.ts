@@ -10,6 +10,7 @@ const kb: KnowledgeBase = {
     { topic: 'refund', risk_level: 'high', public_answer: 'x', allowed_action: 'escalate', requires_human: true },
   ],
   assets: [{ type: 'template', key: 'holding_refund', value: 'Tụi mình nhờ tư vấn viên hỗ trợ nha, để lại SĐT giúp nhé' }],
+  teachers: [],
 };
 
 function fakeLlm(classification: Classification, reply: string): LlmClient {

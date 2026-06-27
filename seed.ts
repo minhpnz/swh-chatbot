@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import pg from 'pg';
-import type { Course, PolicyRow, Asset } from './types';
+import type { Course, PolicyRow, Asset, Teacher } from './types';
 import { loadJson, parseFaqs } from './kb-memory';
 
 config({ path: '.env.local' });
@@ -53,6 +53,18 @@ async function main() {
     );
   }
   console.log(`upserted ${assets.length} -> swh_assets`);
+
+  const teachers = loadJson<Teacher[]>('teachers.json');
+  for (const t of teachers) {
+    await client.query(
+      `insert into swh_teachers (name,tag,role,teaches,classes)
+       values ($1,$2,$3,$4,$5)
+       on conflict (name) do update set tag=excluded.tag, role=excluded.role,
+         teaches=excluded.teaches, classes=excluded.classes, updated_at=now()`,
+      [t.name, t.tag ?? null, t.role ?? null, t.teaches, JSON.stringify(t.classes)],
+    );
+  }
+  console.log(`upserted ${teachers.length} -> swh_teachers`);
 
   const faqs = parseFaqs();
   await client.query('delete from swh_faqs');

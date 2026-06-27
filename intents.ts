@@ -2,7 +2,7 @@ import type { Intent, EscalationReason } from '@/swh/types';
 
 export const INTENTS: Intent[] = [
   'greeting', 'ask_price', 'ask_schedule', 'class_info', 'course_consulting',
-  'placement_test', 'trial_class', 'promo', 'policy_question',
+  'placement_test', 'trial_class', 'promo', 'policy_question', 'teacher_info',
   'payment_intent', 'payment_confirm', 'deposit_refund', 'refund',
   'bao_luu', 'complaint', 'discount_private', 'ask_human',
   'recruitment', 'out_of_scope', 'unknown',

@@ -36,6 +36,13 @@ describe('policyGate', () => {
     expect(policyGate(C('ask_price'), policies, { alreadyClarified: false }).decision).toBe('answer');
   });
 
+  it('answers a teacher_info question (published, low risk, no human)', () => {
+    const r = policyGate(C('teacher_info'), policies, { alreadyClarified: false });
+    expect(r.decision).toBe('answer');
+    expect(r.risk_level).toBe('low');
+    expect(r.requires_human).toBe(false);
+  });
+
   it('clarifies on unknown the first time', () => {
     expect(policyGate(C('unknown', 0.2), policies, { alreadyClarified: false }).decision).toBe('clarify');
   });
