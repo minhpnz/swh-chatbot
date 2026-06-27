@@ -103,7 +103,7 @@ export function ChatWidget() {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online
             </span>
           </div>
-          <p className="truncate text-xs text-gray-400">Tư vấn tuyển sinh · by NomadCraft</p>
+          <p className="truncate text-xs text-gray-400">Tư vấn tuyển sinh</p>
         </div>
       </header>
 
@@ -154,7 +154,7 @@ export function ChatWidget() {
             </svg>
           </button>
         </div>
-        <p className="mt-2 text-center text-[11px] text-gray-300">SpeakwithHang · powered by NomadCraft</p>
+        <p className="mt-2 text-center text-[11px] text-gray-300">SpeakwithHang</p>
       </div>
     </div>
   );
