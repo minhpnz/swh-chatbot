@@ -95,7 +95,7 @@ export function ChatWidget() {
     <div className="mx-auto flex h-[100dvh] max-w-2xl flex-col bg-gradient-to-b from-rose-50/60 via-white to-white">
       {/* Header */}
       <header className="flex items-center gap-3 border-b border-rose-100 bg-white/80 px-4 py-3 backdrop-blur-md">
-        <NomadLogo className="h-10 w-10" />
+        <NomadLogo className="h-10 w-10 shrink-0 ring-1 ring-rose-100" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h1 className="truncate font-semibold text-gray-900">SpeakwithHang</h1>
