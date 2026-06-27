@@ -1,6 +1,31 @@
 import { describe, it, expect, vi } from 'vitest';
-import { withFailover, stripReasoning } from '@/swh/llm';
+import { withFailover, stripReasoning, parseModelList, isRateLimitError } from '@/swh/llm';
 import type { LlmClient, Classification } from '@/swh/types';
+
+describe('parseModelList', () => {
+  const fallback = ['a', 'b'];
+  it('returns the fallback when unset', () => {
+    expect(parseModelList(undefined, fallback)).toEqual(fallback);
+  });
+  it('splits a comma-separated list and trims', () => {
+    expect(parseModelList('llama-3.3-70b-versatile, qwen/qwen3-32b ,llama-3.1-8b-instant', fallback))
+      .toEqual(['llama-3.3-70b-versatile', 'qwen/qwen3-32b', 'llama-3.1-8b-instant']);
+  });
+  it('treats a single model as a one-item list (no rotation)', () => {
+    expect(parseModelList('qwen/qwen3-32b', fallback)).toEqual(['qwen/qwen3-32b']);
+  });
+});
+
+describe('isRateLimitError', () => {
+  it('detects a Groq 429 / token-limit error', () => {
+    expect(isRateLimitError(new Error('Groq 429: tokens per day (TPD): Limit 100000'))).toBe(true);
+    expect(isRateLimitError(new Error('rate_limit_exceeded'))).toBe(true);
+  });
+  it('is false for other errors', () => {
+    expect(isRateLimitError(new Error('Groq 400: bad request'))).toBe(false);
+    expect(isRateLimitError(new Error('network down'))).toBe(false);
+  });
+});
 
 describe('stripReasoning', () => {
   it('removes a <think> reasoning block and keeps the answer', () => {

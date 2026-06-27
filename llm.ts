@@ -127,24 +127,73 @@ export function stripReasoning(text: string): string {
   return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 }
 
-// Groq: free, fast, OpenAI-compatible cloud LLM. No quota wall like Gemini free-tier,
-// no self-hosted machine to keep online. Get a free key at console.groq.com.
+// Groq free tier limits are PER MODEL, so rotating across models multiplies the
+// effective daily quota. Order = Vietnamese quality first. Override / extend via
+// SWH_LLM_MODEL as a comma-separated list.
+const DEFAULT_GROQ_MODELS = [
+  'llama-3.3-70b-versatile',
+  'qwen/qwen3-32b',
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'llama-3.1-8b-instant',
+];
+
+export function parseModelList(raw: string | undefined, fallback: string[]): string[] {
+  if (!raw) return fallback;
+  const list = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  return list.length ? list : fallback;
+}
+
+export function isRateLimitError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /\b429\b|rate.?limit|tokens? per (day|minute)|\bTPD\b|\bTPM\b/i.test(msg);
+}
+
+// Per-model cooldown shared across requests in a warm process: once a model hits
+// its rate/quota limit we skip it until it (likely) recovers, instead of burning a
+// failed call on it every request.
+const groqCooldown = new Map<string, number>();
+
+// Groq: free, fast, OpenAI-compatible cloud LLM. Get a free key at console.groq.com.
 function createGroqClient(): LlmClient {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('Missing GROQ_API_KEY');
-  const model = process.env.SWH_LLM_MODEL ?? 'llama-3.3-70b-versatile';
-  // qwen3 reasoning models think by default; disable it for fast, clean output.
-  const noReasoning = /qwen/i.test(model) ? { reasoning_effort: 'none' } : {};
+  const models = parseModelList(process.env.SWH_LLM_MODEL, DEFAULT_GROQ_MODELS);
 
-  async function chat(messages: { role: string; content: string }[], extra: Record<string, unknown>): Promise<string> {
+  async function callModel(model: string, messages: { role: string; content: string }[], extra: Record<string, unknown>): Promise<string> {
+    // qwen3 reasoning models think by default; disable it for fast, clean output.
+    const noReasoning = /qwen/i.test(model) ? { reasoning_effort: 'none' } : {};
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({ model, messages, ...noReasoning, ...extra }),
     });
-    if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+      const err = new Error(`Groq ${res.status} (${model}): ${await res.text()}`);
+      (err as { retryAfterMs?: number }).retryAfterMs = Number(res.headers.get('retry-after')) * 1000 || undefined;
+      throw err;
+    }
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    return data.choices?.[0]?.message?.content ?? '';
+    return stripReasoning(data.choices?.[0]?.message?.content ?? '');
+  }
+
+  // Try each model in order; on a rate-limit, put it on cooldown and roll to the next.
+  async function chat(messages: { role: string; content: string }[], extra: Record<string, unknown>): Promise<string> {
+    const now = Date.now();
+    let lastErr: unknown;
+    for (const model of models) {
+      if ((groqCooldown.get(model) ?? 0) > now) continue; // still cooling down
+      try {
+        return await callModel(model, messages, extra);
+      } catch (e) {
+        lastErr = e;
+        if (isRateLimitError(e)) {
+          const ms = (e as { retryAfterMs?: number }).retryAfterMs ?? 60_000;
+          groqCooldown.set(model, Date.now() + ms);
+        }
+        // try the next model regardless of error type
+      }
+    }
+    throw lastErr ?? new Error('Groq: all models unavailable');
   }
 
   return {
@@ -153,12 +202,11 @@ function createGroqClient(): LlmClient {
         temperature: 0,
         response_format: { type: 'json_object' },
       });
-      return parseClassification(stripReasoning(content));
+      return parseClassification(content);
     },
     async complete(system: string, messages: ChatTurn[]) {
       const msgs = [{ role: 'system', content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))];
-      const content = await chat(msgs, { temperature: 0.7, max_tokens: 800 });
-      return stripReasoning(content).trim();
+      return (await chat(msgs, { temperature: 0.7, max_tokens: 800 })).trim();
     },
   };
 }
