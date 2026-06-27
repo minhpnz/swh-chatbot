@@ -29,6 +29,11 @@ const kb: KnowledgeBase = {
       teaches: ['Ngữ pháp căn bản'],
       classes: [{ code: 'GLL4', course: 'Lớp Ngữ pháp căn bản', price: '6.900.000đ', format: 'ONL' }],
     },
+    {
+      name: 'Thanh Hằng', tag: 'Founder', role: 'Founder & Giáo viên',
+      teaches: ['Phát âm & Giao tiếp'],
+      classes: [],
+    },
   ],
 };
 
@@ -64,6 +69,29 @@ describe('selectKnowledge', () => {
     const c: Classification = { intent: 'teacher_info', entities: { teacher_name: 'Lym Quỳnh' }, confidence: 0.9 };
     const sel = selectKnowledge(c, 'cô Lym dạy lớp gì vậy ạ', kb);
     expect(sel.teachers.map((t) => t.name)).toContain('Lym Quỳnh');
+  });
+
+  it('matches teacher names without Vietnamese accents', () => {
+    const c: Classification = { intent: 'teacher_info', entities: {}, confidence: 0.9 };
+    const sel = selectKnowledge(c, 'Hang bao nhieu tuoi', kb);
+    expect(sel.teachers.map((t) => t.name)).toContain('Thanh Hằng');
+  });
+
+  it.each([
+    ['co Dung 2k may vay', 'Phương Dung'],
+    ['Miss Lym sinh nam bao nhieu a', 'Lym Quỳnh'],
+    ['Thanh Hang profile co gi hay khong', 'Thanh Hằng'],
+    ['giáo viên Quynh dạy ngữ pháp đúng không', 'Lym Quỳnh'],
+  ])('matches Vietnamese teacher paraphrases: %s', (text, expectedName) => {
+    const c: Classification = { intent: 'teacher_info', entities: {}, confidence: 0.9 };
+    const sel = selectKnowledge(c, text, kb);
+    expect(sel.teachers.map((t) => t.name)).toContain(expectedName);
+  });
+
+  it('does not confuse the normal word "đúng" with teacher Dung on non-teacher intents', () => {
+    const c: Classification = { intent: 'greeting', entities: {}, confidence: 0.9 };
+    const sel = selectKnowledge(c, 'dạ đúng rồi, em hiểu phần này rồi ạ', kb);
+    expect(sel.teachers).toEqual([]);
   });
 
   it('includes the teacher-info link ref for any teacher_info question', () => {

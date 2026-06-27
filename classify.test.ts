@@ -38,6 +38,13 @@ describe('buildClassifyPrompt', () => {
     expect(p).toContain('học phí bao nhiêu');
     expect(p).toContain('ask_price');
   });
+
+  it('documents casual teacher age and Vietnamese birth-year shorthand as teacher_info', () => {
+    const p = buildClassifyPrompt('Hằng bao nhiêu tuổi', []);
+    expect(p).toContain('teacher_info');
+    expect(p).toContain('2k2 nghĩa là sinh năm 2002');
+    expect(p).toContain('sinh năm 90 nghĩa là 1990');
+  });
 });
 
 describe('classifyMessage', () => {

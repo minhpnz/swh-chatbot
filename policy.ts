@@ -4,7 +4,7 @@ import { ESCALATE_INTENTS, CONFIDENCE_THRESHOLD } from '@/swh/intents';
 export function policyGate(
   c: Classification,
   policies: PolicyRow[],
-  opts: { alreadyClarified: boolean },
+  opts: { alreadyClarified: boolean; casualFallback?: boolean },
 ): PolicyResult {
   // 1) Hard-escalate cluster (personal money / dispute / complaint / human).
   const esc = ESCALATE_INTENTS[c.intent];
@@ -24,8 +24,24 @@ export function policyGate(
     return { decision: 'answer', risk_level: 'low', requires_human: false };
   }
 
+  if (c.intent === 'out_of_scope') {
+    if (opts.casualFallback) {
+      return { decision: 'answer', risk_level: 'low', requires_human: false };
+    }
+    if (opts.alreadyClarified) {
+      return {
+        decision: 'escalate', risk_level: 'low', requires_human: true,
+        escalation_reason: 'out_of_scope', holding_template_key: 'holding_default',
+      };
+    }
+    return { decision: 'clarify', risk_level: 'low', requires_human: false };
+  }
+
   // 3) Unknown / low confidence -> clarify once, then escalate.
   if (c.intent === 'unknown' || c.confidence < CONFIDENCE_THRESHOLD) {
+    if (opts.casualFallback) {
+      return { decision: 'answer', risk_level: 'low', requires_human: false };
+    }
     if (opts.alreadyClarified) {
       return {
         decision: 'escalate', risk_level: 'low', requires_human: true,

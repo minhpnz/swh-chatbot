@@ -17,7 +17,6 @@ export const ESCALATE_INTENTS: Record<string, { reason: EscalationReason; templa
   complaint: { reason: 'complaint', template: 'holding_complaint' },
   discount_private: { reason: 'discount', template: 'holding_default' },
   ask_human: { reason: 'ask_human', template: 'holding_default' },
-  out_of_scope: { reason: 'out_of_scope', template: 'holding_default' },
 };
 
 export const CONFIDENCE_THRESHOLD = 0.5;

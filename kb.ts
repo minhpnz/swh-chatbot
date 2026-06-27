@@ -5,9 +5,19 @@ import type {
 const STOP = new Set([
   'em', 'mình', 'ạ', 'có', 'không', 'ko', 'là', 'cho', 'hỏi', 'của',
   'bên', 'được', 'dạ', 'về', 'thì', 'và', 'nha', 'ad', 'cần', 'với',
+  'minh', 'co', 'khong', 'la', 'hoi', 'cua', 'ben', 'duoc', 'da', 've', 'thi', 'va', 'can',
+  'dung',
 ]);
+export function normalizeVietnamese(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/đ/gu, 'd');
+}
 function tokens(s: string): string[] {
-  return (s.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []).filter((t) => t.length > 1 && !STOP.has(t));
+  return (normalizeVietnamese(s).match(/[\p{L}\p{N}]+/gu) ?? [])
+    .filter((t) => t.length > 1 && !STOP.has(t));
 }
 function overlap(a: string[], b: Set<string>): number {
   return a.reduce((n, t) => n + (b.has(t) ? 1 : 0), 0);
@@ -18,22 +28,24 @@ const ALL_COURSE_INTENTS = new Set<string>([
 ]);
 
 // Vietnamese teacher titles that precede a name ("cô Dung", "Miss Lym", "giáo viên Quỳnh").
-const TEACHER_TITLE = '(?:cô|thầy|miss|mr|ms|gv|cô giáo|thầy giáo|giáo viên|trợ giảng)';
+const TEACHER_TITLE = '(?:co|thay|miss|mr|ms|gv|co giao|thay giao|giao vien|tro giang)';
 
 // Match teachers referenced in a message — by the classifier's teacher_name entity,
 // by full name appearing in the text, or by a titled given/family name token.
-function matchTeachers(text: string, teacherName: string | undefined, teachers: Teacher[]): Teacher[] {
-  const hay = ` ${text.toLowerCase()} `;
-  const needle = teacherName?.toLowerCase().trim();
+export function matchTeachers(text: string, teacherName: string | undefined, teachers: Teacher[]): Teacher[] {
+  const hay = ` ${normalizeVietnamese(text)} `;
+  const textToks = new Set(tokens(text));
+  const needle = teacherName ? normalizeVietnamese(teacherName).trim() : undefined;
   const needleToks = needle ? needle.split(/\s+/).filter((p) => p.length > 1) : [];
   return teachers.filter((t) => {
-    const full = t.name.toLowerCase();
+    const full = normalizeVietnamese(t.name);
     if (needle && (full.includes(needle) || needle.includes(full))) return true;
     if (hay.includes(full)) return true;
     const toks = full.split(/\s+/).filter((p) => p.length > 1);
     return toks.some(
       (p) =>
         needleToks.includes(p) ||
+        textToks.has(p) ||
         new RegExp(`${TEACHER_TITLE}\\s+(?:[\\p{L}]+\\s+)?${p}(?![\\p{L}])`, 'u').test(hay),
     );
   });

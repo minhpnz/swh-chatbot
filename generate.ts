@@ -12,8 +12,30 @@ function actionDirective(decision: Decision): string {
   }
 }
 
+function birthYearFromTag(tag: string | undefined): number | null {
+  if (!tag) return null;
+  const t = tag.trim().toLowerCase();
+  const twoK = t.match(/^2k(\d{1,2})$/u);
+  if (twoK?.[1]) return 2000 + Number(twoK[1].padStart(2, '0'));
+  const fourDigit = t.match(/^(19\d{2}|20\d{2})$/u);
+  if (fourDigit?.[1]) return Number(fourDigit[1]);
+  const twoDigit = t.match(/^\d{2}$/u);
+  if (!twoDigit) return null;
+  const yy = Number(t);
+  return yy >= 30 ? 1900 + yy : 2000 + yy;
+}
+
+function formatTeacherTag(tag: string | undefined): string {
+  const year = birthYearFromTag(tag);
+  if (!year) return tag ? ` (${tag})` : '';
+  const currentYear = new Date().getFullYear();
+  const age = currentYear - year;
+  const ageText = age > 0 ? `, khoảng ${Math.max(0, age - 1)}-${age} tuổi tuỳ sinh nhật` : '';
+  return ` (sinh năm ${year}${ageText})`;
+}
+
 function renderTeacher(t: SelectedKnowledge['teachers'][number]): string {
-  const head = `• ${t.name}${t.tag ? ` (${t.tag})` : ''}${t.role ? ` — ${t.role}` : ''}`;
+  const head = `• ${t.name}${formatTeacherTag(t.tag)}${t.role ? ` — ${t.role}` : ''}`;
   if (t.classes.length === 0) {
     const teaches = t.teaches.length ? ` Phụ trách: ${t.teaches.join(', ')}.` : '';
     return `${head}: hiện chưa có lớp đang mở ghi danh.${teaches}`;
@@ -44,7 +66,7 @@ export function buildGeneratePrompt(sel: SelectedKnowledge, decision: Decision, 
     faqs ? `CÂU TRẢ LỜI MẪU (ưu tiên dùng gần đúng, giữ nguyên ý + tone):\n${faqs}` : '',
     policies ? `CHÍNH SÁCH ĐƯỢC PHÉP NÓI:\n${policies}` : '',
     allowedLinks.length ? `CHỈ ĐƯỢC DÙNG CÁC LINK SAU (nếu cần):\n${allowedLinks.join('\n')}` : 'KHÔNG được chèn link nào.',
-    'RÀNG BUỘC: không bịa học phí/lịch ngoài dữ liệu trên; không tự tạo link; không dùng từ "bot/admin/AI"; tiếng Việt, tone SwH dễ thương.',
+    'RÀNG BUỘC: không bịa học phí/lịch/chính sách/quy định ngoài dữ liệu trên; không tự tạo link; không dùng từ "bot/admin/AI"; tiếng Việt, tone SwH dễ thương. Với câu hỏi đời thường hoặc thông tin mềm về người/giáo viên/profile, nếu không biết thì nói tự nhiên kiểu "em cũng không biết nữa hehe" hoặc "cái này em chưa rõ á hehe"; tránh câu máy móc như "dữ liệu hiện tại chưa có thông tin". Không xin SĐT/chuyển tư vấn chỉ vì thiếu dữ liệu đời thường. Chỉ xin Tên + SĐT khi khách đang hỏi tư vấn khoá học/đăng ký/ưu đãi/form hoặc cần follow-up thật.',
     `NHIỆM VỤ: ${actionDirective(decision)}`,
   ].filter(Boolean).join('\n\n');
 }

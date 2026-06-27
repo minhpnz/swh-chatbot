@@ -26,6 +26,23 @@ describe('extractPriceMentions', () => {
     const m = extractPriceMentions('học phí khoảng 4.900.000đ tới 5.200.000đ, cọc 1 chẹo');
     expect(m.length).toBeGreaterThanOrEqual(3);
   });
+
+  it('does not treat plain birth years as prices', () => {
+    expect(extractPriceMentions('Cô Lym sinh năm 1990, cô Dung sinh năm 2002 nha')).toEqual([]);
+  });
+
+  it.each([
+    'Cô Dung 2k2 nha, chắc cỡ 23-24 tuổi tuỳ sinh nhật.',
+    'Cô Dung 2k mấy em cũng chưa rõ á hehe.',
+    'Miss Lym sinh năm 90, không phải thông tin học phí đâu nha.',
+    'Bạn đó gen Z, sinh năm 2001 á.',
+  ])('does not treat birth-year wording as prices: %s', (text) => {
+    expect(extractPriceMentions(text)).toEqual([]);
+  });
+
+  it('still detects real k-denominated prices after ignoring 2k birth-year shorthand', () => {
+    expect(extractPriceMentions('ưu đãi giảm 50k, không phải 2k2')).toEqual(['50k']);
+  });
 });
 
 describe('buildAllowedPriceSet', () => {
@@ -101,5 +118,15 @@ describe('validateReply', () => {
     const r = validateReply('Bạn được hoàn cọc nha', ctx({ requiresHuman: true, decision: 'answer' }));
     expect(r.ok).toBe(false);
     expect(r.violations.some((v) => v.includes('high_risk'))).toBe(true);
+  });
+
+  it('allows teacher birth years in normal replies', () => {
+    const r = validateReply('Cô Dung sinh năm 2002, còn Miss Lym sinh năm 1990 nha.', ctx());
+    expect(r.ok).toBe(true);
+  });
+
+  it('allows 2k shorthand in teacher replies without treating it as tuition', () => {
+    const r = validateReply('Cô Dung 2k2 á, nên tầm 23-24 tuổi tuỳ sinh nhật nha.', ctx());
+    expect(r.ok).toBe(true);
   });
 });

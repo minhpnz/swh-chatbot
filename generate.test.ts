@@ -37,7 +37,16 @@ describe('buildGeneratePrompt', () => {
     };
     const p = buildGeneratePrompt(withTeacher, 'answer' as Decision, ['https://s.net.vn/EjyT']);
     expect(p).toContain('Phương Dung');
+    expect(p).toContain('sinh năm 2002');
     expect(p).toContain('Lớp IPA chuyên sâu');
     expect(p).toContain('3.200.000đ');
+  });
+
+  it('tells the model not to collect contact info for casual missing teacher/profile data', () => {
+    const p = buildGeneratePrompt({ ...sel, courses: [], faqs: [], policies: [] }, 'answer' as Decision, []);
+    expect(p).toContain('câu hỏi đời thường');
+    expect(p).toContain('em cũng không biết nữa hehe');
+    expect(p).toContain('tránh câu máy móc');
+    expect(p).toContain('Không xin SĐT');
   });
 });

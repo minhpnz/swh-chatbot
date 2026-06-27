@@ -15,10 +15,16 @@ export function normalizePrice(token: string): string {
 
 export function extractPriceMentions(text: string): string[] {
   const out: string[] = [];
-  const re = /(\d+\s*(?:tr|triệu|chẹo)\s*\d?|\d+\s*(?:k|nghìn|ngàn)|\d[\d.,]*\s*(?:đ|vnđ)|\d[\d.,]{3,})/giu;
+  const re = /(\d+\s*(?:tr|triệu|chẹo)\s*\d?|\d+\s*(?:k|nghìn|ngàn)(?!\d)|\d[\d.,]*\s*(?:đ|vnđ)|\d[\d.,]{3,})/giu;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
-    if (m[1]) out.push(m[1].trim());
+    if (!m[1]) continue;
+    const token = m[1].trim();
+    const digits = token.replace(/[^\d]/g, '');
+    const hasPriceUnit = /(tr|triệu|chẹo|k|nghìn|ngàn|đ|vnđ)/iu.test(token);
+    const plainBirthYear = !hasPriceUnit && /^\d{4}$/u.test(digits) && Number(digits) >= 1900 && Number(digits) <= new Date().getFullYear();
+    const twoKBirthShorthand = /^2\s*k$/iu.test(token);
+    if (!plainBirthYear && !twoKBirthShorthand) out.push(token);
   }
   return out;
 }
