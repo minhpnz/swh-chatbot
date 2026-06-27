@@ -121,18 +121,26 @@ function createOllamaClient(): LlmClient {
   };
 }
 
+// Remove a leading <think>...</think> reasoning block (qwen3 etc.) so it never
+// reaches the user or breaks JSON parsing. Defensive even when reasoning is off.
+export function stripReasoning(text: string): string {
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+}
+
 // Groq: free, fast, OpenAI-compatible cloud LLM. No quota wall like Gemini free-tier,
 // no self-hosted machine to keep online. Get a free key at console.groq.com.
 function createGroqClient(): LlmClient {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('Missing GROQ_API_KEY');
   const model = process.env.SWH_LLM_MODEL ?? 'llama-3.3-70b-versatile';
+  // qwen3 reasoning models think by default; disable it for fast, clean output.
+  const noReasoning = /qwen/i.test(model) ? { reasoning_effort: 'none' } : {};
 
   async function chat(messages: { role: string; content: string }[], extra: Record<string, unknown>): Promise<string> {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages, ...extra }),
+      body: JSON.stringify({ model, messages, ...noReasoning, ...extra }),
     });
     if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
@@ -145,12 +153,12 @@ function createGroqClient(): LlmClient {
         temperature: 0,
         response_format: { type: 'json_object' },
       });
-      return parseClassification(content);
+      return parseClassification(stripReasoning(content));
     },
     async complete(system: string, messages: ChatTurn[]) {
       const msgs = [{ role: 'system', content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))];
       const content = await chat(msgs, { temperature: 0.7, max_tokens: 800 });
-      return content.trim();
+      return stripReasoning(content).trim();
     },
   };
 }

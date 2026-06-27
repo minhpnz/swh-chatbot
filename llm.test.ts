@@ -1,6 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
-import { withFailover } from '@/swh/llm';
+import { withFailover, stripReasoning } from '@/swh/llm';
 import type { LlmClient, Classification } from '@/swh/types';
+
+describe('stripReasoning', () => {
+  it('removes a <think> reasoning block and keeps the answer', () => {
+    const out = stripReasoning('<think>Phương Dung dạy IPA, let me phrase it</think>\nDạ cô dạy lớp IPA nha!');
+    expect(out).toBe('Dạ cô dạy lớp IPA nha!');
+    expect(out).not.toContain('<think>');
+  });
+
+  it('handles multi-line reasoning blocks', () => {
+    const out = stripReasoning('<think>\nline1\nline2\n</think>Trả lời cuối');
+    expect(out).toBe('Trả lời cuối');
+  });
+
+  it('leaves a normal reply untouched', () => {
+    expect(stripReasoning('Học phí khoảng 7.900.000đ nha')).toBe('Học phí khoảng 7.900.000đ nha');
+  });
+});
 
 const CLS = (intent: Classification['intent']): Classification => ({ intent, entities: {}, confidence: 1 });
 
