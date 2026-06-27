@@ -22,6 +22,9 @@ function tokens(s: string): string[] {
 function overlap(a: string[], b: Set<string>): number {
   return a.reduce((n, t) => n + (b.has(t) ? 1 : 0), 0);
 }
+function textIncludesAny(haystack: string, needles: string[]): boolean {
+  return needles.some((needle) => haystack.includes(needle));
+}
 
 const ALL_COURSE_INTENTS = new Set<string>([
   'ask_price', 'ask_schedule', 'class_info', 'course_consulting', 'placement_test', 'trial_class', 'promo',
@@ -64,6 +67,25 @@ export function selectKnowledge(c: Classification, text: string, kb: KnowledgeBa
       return co.name.toLowerCase().includes(name) || (head.length > 0 && name.includes(head));
     });
   }
+  if (courses.length === 0) {
+    const hay = normalizeVietnamese(text);
+    const mentionedCourse = textIncludesAny(hay, ['ipa', 'phat am', 'giao tiep', 'ngu phap', 'video', '1 1']);
+    if (mentionedCourse) {
+      courses = kb.courses.filter((co) => {
+        const blob = normalizeVietnamese([
+          co.slug, co.name, co.helps_with, co.good_for, co.entry_level, co.curriculum, co.formats,
+        ].filter(Boolean).join(' '));
+        return (
+          (hay.includes('ipa') && blob.includes('ipa')) ||
+          (hay.includes('phat am') && blob.includes('phat am')) ||
+          (hay.includes('giao tiep') && blob.includes('giao tiep')) ||
+          (hay.includes('ngu phap') && blob.includes('ngu phap')) ||
+          (hay.includes('video') && blob.includes('video')) ||
+          (hay.includes('1 1') && blob.includes('1 1'))
+        );
+      });
+    }
+  }
   if (courses.length === 0 && ALL_COURSE_INTENTS.has(c.intent)) courses = kb.courses;
   courses.forEach((co) => refs.push(`course:${co.slug}`));
 
@@ -93,6 +115,22 @@ export function selectKnowledge(c: Classification, text: string, kb: KnowledgeBa
   // Teachers: match by name; for teacher_info with no specific name, return all.
   const allTeachers = kb.teachers ?? [];
   let teachers: Teacher[] = matchTeachers(text, c.entities.teacher_name, allTeachers);
+  const hay = normalizeVietnamese(text);
+  if (textIncludesAny(hay, ['ipa', 'phat am', 'giao tiep', 'ngu phap'])) {
+    const classMatches = allTeachers.filter((t) => {
+      const blob = normalizeVietnamese([
+        ...t.teaches,
+        ...t.classes.flatMap((cl) => [cl.code, cl.course]),
+      ].filter(Boolean).join(' '));
+      return (
+        (hay.includes('ipa') && blob.includes('ipa')) ||
+        (hay.includes('phat am') && blob.includes('phat am')) ||
+        (hay.includes('giao tiep') && blob.includes('giao tiep')) ||
+        (hay.includes('ngu phap') && blob.includes('ngu phap'))
+      );
+    });
+    teachers = [...teachers, ...classMatches.filter((t) => !teachers.some((existing) => existing.name === t.name))];
+  }
   if (c.intent === 'teacher_info' && teachers.length === 0) teachers = allTeachers;
   teachers.forEach((t) => refs.push(`teacher:${t.name}`));
   if (c.intent === 'teacher_info' || teachers.length > 0) {

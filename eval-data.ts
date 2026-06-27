@@ -74,7 +74,7 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Em muốn học kèm 1-1 thì học như thế nào ạ', expectIntents: ['course_consulting', 'class_info'], expectDecisions: ANSWERY },
   { utterance: 'Em đi làm bận rộn thì nên học khoá nào ạ', expectIntents: ['course_consulting'], expectDecisions: ANSWERY },
 
-  // teacher_info (10) — image source "LỊCH KHAI GIẢNG" + "Hồ sơ giáo viên" link.
+  // teacher_info (12) — image source "LỊCH KHAI GIẢNG" + "Hồ sơ giáo viên" link.
   // Name variants, titles (cô/Miss), roster + profile-link nuance.
   { utterance: 'Hiện tại giáo viên Phương Dung đang dạy lớp nào ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
   { utterance: 'Cô Lym dạy lớp gì vậy ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
@@ -86,6 +86,8 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Cô Anh Thư đang mở lớp nào không ạ', expectIntents: ['teacher_info', 'ask_schedule'], expectDecisions: ANSWERY },
   { utterance: 'Miss Quỳnh có nhận dạy kèm 1-1 không ạ', expectIntents: ['teacher_info', 'course_consulting', 'class_info'], expectDecisions: ANSWERY },
   { utterance: 'Ai là người dạy chính của khoá ngữ pháp căn bản vậy ạ', expectIntents: ['teacher_info', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Cô Thanh Hằng năm nay bao nhiêu tuổi ạ', expectIntents: ['teacher_info'], expectDecisions: ANSWERY },
+  { utterance: 'Có lớp IPA không, Hằng đang mở lớp gì và Hằng bao nhiêu tuổi', expectIntents: ['teacher_info', 'class_info', 'ask_schedule'], expectDecisions: ANSWERY },
 
   // trial_class (6) — FAQ "học thử/demo"
   { utterance: 'Bên mình có học thử/demo không ạ', expectIntents: ['trial_class'], expectDecisions: ANSWERY },
@@ -139,13 +141,12 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Bên mình đang tuyển vị trí nào không ạ', expectIntents: ['recruitment'], expectDecisions: ANSWERY },
   { utterance: 'Em muốn xin làm trợ giảng tiếng Anh ạ', expectIntents: ['recruitment'], expectDecisions: ANSWERY },
 
-  // out_of_scope (7) — FAQ "TOEIC/IELTS", quick-reply "khảo sát TOEIC", "nói trước đám đông"; founder/internal
+  // out_of_scope (6) — FAQ "TOEIC/IELTS", quick-reply "khảo sát TOEIC", "nói trước đám đông"; internal
   { utterance: 'Bên bạn có nhận dạy TOEIC/IELTS không ạ', expectIntents: ['out_of_scope', 'course_consulting', 'unknown'], expectDecisions: OOS },
   { utterance: 'Học xong khoá ngữ pháp thi TOEIC và IELTS được không ạ', expectIntents: ['out_of_scope', 'course_consulting'], expectDecisions: OOS },
   { utterance: 'Trung tâm có lớp luyện thi IELTS không ạ', expectIntents: ['out_of_scope', 'course_consulting'], expectDecisions: OOS },
   { utterance: 'Bên mình có dạy tiếng Nhật không ạ', expectIntents: ['out_of_scope', 'course_consulting', 'unknown'], expectDecisions: OOS },
   { utterance: 'Có lớp luyện nói trước đám đông không ạ', expectIntents: ['out_of_scope', 'course_consulting'], expectDecisions: OOS },
-  { utterance: 'Cô Thanh Hằng năm nay bao nhiêu tuổi ạ', expectIntents: ['out_of_scope', 'unknown'], expectDecisions: OOS },
   { utterance: 'Cho em xin giáo trình nội bộ của trung tâm', expectIntents: ['out_of_scope', 'unknown', 'course_consulting'], expectDecisions: OOS },
 
   // unknown (6)

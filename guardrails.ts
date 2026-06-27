@@ -57,7 +57,13 @@ function extractLinks(text: string): string[] {
 
 export function validateReply(
   reply: string,
-  ctx: { allowedPrices: Set<string>; assets: Asset[]; requiresHuman: boolean; decision: Decision },
+  ctx: {
+    allowedPrices: Set<string>;
+    assets: Asset[];
+    requiresHuman: boolean;
+    decision: Decision;
+    teachers?: Array<{ profile_url?: string; video_urls?: string[] }>;
+  },
 ): GuardrailResult {
   const violations: string[] = [];
 
@@ -69,6 +75,10 @@ export function validateReply(
 
   // 2) Links: every URL must be in the asset registry.
   const allowedUrls = new Set(ctx.assets.map((a) => a.value));
+  for (const t of ctx.teachers ?? []) {
+    if (t.profile_url) allowedUrls.add(t.profile_url);
+    for (const url of t.video_urls ?? []) allowedUrls.add(url);
+  }
   for (const url of extractLinks(reply)) {
     if (!allowedUrls.has(url)) violations.push(`unapproved_link:${url}`);
   }

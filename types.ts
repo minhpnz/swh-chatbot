@@ -63,6 +63,11 @@ export interface TeacherClass {
 
 export interface Teacher {
   name: string; tag?: string; role?: string;
+  birth_year?: number;
+  hometown?: string;
+  profile_notes?: string;
+  profile_url?: string;
+  video_urls?: string[];
   teaches: string[]; classes: TeacherClass[];
 }
 

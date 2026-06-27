@@ -3,6 +3,15 @@
     "name": "Phương Dung",
     "tag": "2k2",
     "role": "Giáo viên",
+    "birth_year": 2002,
+    "hometown": "TP.Hồ Chí Minh",
+    "profile_notes": "Đại học Quốc tế - ĐHQG ngành Marketing; TESOL, IELTS 7.0, TOEIC 980",
+    "profile_url": "https://s.net.vn/EjyT",
+    "video_urls": [
+      "https://youtu.be/_FZ9GH_r5Hg?si=-sag0h_DA5Q4p47X",
+      "https://youtu.be/TAcDBMX-BPo?si=mNlQbmMTX-xQFNsE",
+      "https://www.youtube.com/watch?v=5hlmfc69smM"
+    ],
     "teaches": ["Lớp IPA chuyên sâu", "Phát âm & Giao tiếp", "Ngữ pháp căn bản"],
     "classes": [
       {
@@ -22,6 +31,15 @@
     "name": "Thanh Hằng",
     "tag": "Founder",
     "role": "Founder & Giáo viên",
+    "birth_year": 1999,
+    "hometown": "TP.Đà Lạt - Lâm Đồng",
+    "profile_notes": "Founder SpeakwithHang; UEH ngành Kinh tế Đầu tư; TESOL, TOEIC 945",
+    "profile_url": "https://s.net.vn/EjyT",
+    "video_urls": [
+      "https://drive.google.com/file/d/1a53hAW_eC01KohImnJYX0-Ae3PO0pKIx/view?usp=drive_link",
+      "https://1drv.ms/v/c/7b6ec0bd7700af67/EVdxhk6svHBJu1CJ5bcZyz0BnGS0Awv4IitQ7iHhyGiMDA?e=fipqT7",
+      "https://drive.google.com/file/d/1Is8LFAeRK3xMwfOGFh1lPnBIjrp9PxGM/view"
+    ],
     "teaches": ["Phát âm & Giao tiếp"],
     "classes": [
       {
@@ -41,6 +59,10 @@
     "name": "Ánh Quỳnh",
     "tag": "97",
     "role": "Giáo viên",
+    "birth_year": 1997,
+    "hometown": "Đà Lạt - Lâm Đồng",
+    "profile_notes": "Đại học Tài chính - Marketing ngành Quản trị nhà hàng",
+    "profile_url": "https://s.net.vn/EjyT",
     "teaches": ["Phát âm & Giao tiếp", "Lớp IPA chuyên sâu", "Ngữ pháp căn bản"],
     "classes": [
       {
@@ -67,6 +89,16 @@
     "name": "Anh Thư",
     "tag": "2k2",
     "role": "Giáo viên",
+    "birth_year": 2002,
+    "hometown": "TP.Đà Lạt - Lâm Đồng",
+    "profile_notes": "Đại học Kinh tế - Luật ngành Luật kinh doanh; TESOL, TOEIC 900",
+    "profile_url": "https://s.net.vn/EjyT",
+    "video_urls": [
+      "https://youtu.be/kDqRTTWiOac?si=n69gOFOysXFxVx_o",
+      "https://youtu.be/TNzPncu51jk?si=RH5VD5tL-es2txHc",
+      "https://youtu.be/qP9fKA7TTHc",
+      "https://youtu.be/7IrBS6_wPZY?si=o7S0mTGQFdQl06Cg"
+    ],
     "teaches": ["Phát âm & Giao tiếp"],
     "classes": [
       {
@@ -108,6 +140,15 @@
     "name": "Búp Loan",
     "tag": "2k1",
     "role": "Giáo viên",
+    "birth_year": 2001,
+    "hometown": "Quảng Ngãi",
+    "profile_notes": "Đại học Ngân hàng TP.HCM ngành Ngôn ngữ Anh; TESOL, TOEIC 895",
+    "profile_url": "https://s.net.vn/EjyT",
+    "video_urls": [
+      "https://youtu.be/oQlvwH8clv8",
+      "https://youtu.be/9pHMacMXheQ",
+      "https://youtu.be/tq8QPWxCt24"
+    ],
     "teaches": ["Phát âm & Giao tiếp"],
     "classes": [
       {
@@ -127,6 +168,18 @@
     "name": "Lym Quỳnh",
     "tag": "90",
     "role": "Giáo viên",
+    "birth_year": 1990,
+    "hometown": "TP.Hồ Chí Minh",
+    "profile_notes": "Đại học KHXH&NV ngành Ngữ Văn Anh, GPA 8.4/10; TOEIC 950",
+    "profile_url": "https://s.net.vn/EjyT",
+    "video_urls": [
+      "https://youtu.be/wK2bF8MQEbM?si=njLUZrYmLaCheqA5",
+      "https://youtu.be/WKZ80ruW-Ng?si=bXoBZcrR7EWwyKcA",
+      "https://youtu.be/UWUetOvC45s?si=9BcwU0adgNEKTTQ9",
+      "https://youtu.be/gfCrzcQMRN4?si=QNwHQTlkGBWgRwAn",
+      "https://youtu.be/YQa2gvtwoeM?si=I7tiKz1eFI5l_FRZ",
+      "https://youtu.be/UAq2jHzAc78"
+    ],
     "teaches": ["Ngữ pháp căn bản"],
     "classes": [
       {
@@ -175,6 +228,12 @@
     "name": "Thục Quyên",
     "tag": "2k3",
     "role": "Giáo viên",
+    "birth_year": 2003,
+    "profile_url": "https://s.net.vn/EjyT",
+    "video_urls": [
+      "https://youtu.be/a1gFTlzwAEE",
+      "https://youtu.be/zE3LOPIUpSA"
+    ],
     "teaches": ["Phát âm & Giao tiếp", "Lớp IPA chuyên sâu"],
     "classes": []
   },
@@ -182,6 +241,10 @@
     "name": "Ngọc Hân",
     "tag": "2001",
     "role": "Trợ giảng (TA)",
+    "birth_year": 2001,
+    "hometown": "Tiền Giang",
+    "profile_notes": "Đại học Tài chính - Marketing ngành Thương mại quốc tế; trợ giảng 2 lớp OLL",
+    "profile_url": "https://s.net.vn/EjyT",
     "teaches": ["Trợ giảng 2 lớp ONL"],
     "classes": []
   }

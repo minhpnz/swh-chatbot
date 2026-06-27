@@ -90,13 +90,18 @@ export async function runPipeline(input: PipelineInput, llm: LlmClient): Promise
       risk_level: policy.risk_level,
     };
   } else {
-    const allowedLinks = kb.assets.filter((a) => a.type === 'form' || a.type === 'link').map((a) => a.value);
+    const teacherLinks = (kb.teachers ?? []).flatMap((t) => [t.profile_url, ...(t.video_urls ?? [])]);
+    const allowedLinks = [
+      ...kb.assets.filter((a) => a.type === 'form' || a.type === 'link').map((a) => a.value),
+      ...teacherLinks.filter((url): url is string => Boolean(url)),
+    ];
     reply = await generateReply(sel, decision, allowedLinks, history, text, llm);
     guardrail = validateReply(reply, {
       allowedPrices: buildAllowedPriceSet(kb),
       assets: kb.assets,
       requiresHuman: policy.requires_human,
       decision,
+      teachers: kb.teachers,
     });
     if (!guardrail.ok) {
       reply = template(kb.assets, 'holding_default');

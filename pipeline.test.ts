@@ -12,9 +12,18 @@ const kb: KnowledgeBase = {
   assets: [{ type: 'template', key: 'holding_refund', value: 'Tụi mình nhờ tư vấn viên hỗ trợ nha, để lại SĐT giúp nhé' }],
   teachers: [
     {
-      name: 'Thanh Hằng', tag: '90', role: 'Founder & Giáo viên',
+      name: 'Thanh Hằng', tag: 'Founder', role: 'Founder & Giáo viên',
+      birth_year: 1999,
+      profile_url: 'https://s.net.vn/EjyT',
+      video_urls: ['https://drive.google.com/file/d/1a53hAW_eC01KohImnJYX0-Ae3PO0pKIx/view?usp=drive_link'],
       teaches: ['Phát âm & Giao tiếp'],
       classes: [{ code: 'OMH19', course: 'Lớp Giao tiếp Tiếng Anh & Phát âm IPA', price: '7.900.000đ' }],
+    },
+    {
+      name: 'Phương Dung', tag: '2k2', role: 'Giáo viên',
+      birth_year: 2002,
+      teaches: ['Lớp IPA chuyên sâu'],
+      classes: [{ code: 'IPA+L2', course: 'Lớp IPA chuyên sâu', price: '3.200.000đ' }],
     },
   ],
 };
@@ -58,13 +67,30 @@ describe('runPipeline', () => {
   it('treats casual teacher age questions as teacher_info instead of price or escalation', async () => {
     const llm = fakeLlm(
       { intent: 'ask_price', entities: {}, confidence: 0.35 },
-      'Chị Hằng sinh năm 1990 nên hiện khoảng 35-36 tuổi tuỳ sinh nhật nha.',
+      'Thanh Hằng sinh năm 1999 nên hiện khoảng 26-27 tuổi tuỳ sinh nhật nha.',
     );
     const r = await runPipeline({ text: 'Hang bao nhieu tuoi', history: [], kb, alreadyClarified: true }, llm);
     expect(r.classification.intent).toBe('teacher_info');
     expect(r.decision).toBe('answer');
     expect(r.escalation).toBeUndefined();
     expect(r.guardrail.ok).toBe(true);
+  });
+
+  it('answers mixed IPA class, named teacher class, and age questions from structured data', async () => {
+    const llm = fakeLlm(
+      { intent: 'teacher_info', entities: {}, confidence: 0.9 },
+      'Hiện có lớp IPA+L2 của Phương Dung, còn Thanh Hằng đang dạy OMH19. Thanh Hằng sinh năm 1999, khoảng 26-27 tuổi tuỳ sinh nhật nha.',
+    );
+    const r = await runPipeline({
+      text: 'cho hỏi hiện tại có lớp ipa không và Hang có đang mở lớp gì không và Hang bao nhiêu tuổi',
+      history: [],
+      kb,
+    }, llm);
+    expect(r.decision).toBe('answer');
+    expect(r.escalation).toBeUndefined();
+    expect(r.guardrail.ok).toBe(true);
+    expect(r.kb_refs).toEqual(expect.arrayContaining(['teacher:Thanh Hằng', 'teacher:Phương Dung']));
+    expect(r.reply).not.toMatch(/SĐT|liên hệ lại|tư vấn thêm/u);
   });
 
   it.each([

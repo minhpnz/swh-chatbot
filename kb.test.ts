@@ -21,18 +21,23 @@ const kb: KnowledgeBase = {
   teachers: [
     {
       name: 'Phương Dung', tag: '2k2', role: 'Giáo viên',
+      birth_year: 2002,
       teaches: ['Lớp IPA chuyên sâu'],
       classes: [{ code: 'IPA+L2', course: 'Lớp IPA chuyên sâu', start: 'Thứ 4, 5/8', price: '3.200.000đ', format: 'ONL' }],
     },
     {
       name: 'Lym Quỳnh', tag: '90', role: 'Giáo viên',
+      birth_year: 1990,
       teaches: ['Ngữ pháp căn bản'],
       classes: [{ code: 'GLL4', course: 'Lớp Ngữ pháp căn bản', price: '6.900.000đ', format: 'ONL' }],
     },
     {
       name: 'Thanh Hằng', tag: 'Founder', role: 'Founder & Giáo viên',
+      birth_year: 1999,
+      profile_url: 'https://s.net.vn/EjyT',
+      video_urls: ['https://drive.google.com/file/d/1a53hAW_eC01KohImnJYX0-Ae3PO0pKIx/view?usp=drive_link'],
       teaches: ['Phát âm & Giao tiếp'],
-      classes: [],
+      classes: [{ code: 'OMH19', course: 'Lớp Giao tiếp Tiếng Anh & Phát âm IPA', price: '7.900.000đ', format: 'ONL' }],
     },
   ],
 };
@@ -99,5 +104,13 @@ describe('selectKnowledge', () => {
     const sel = selectKnowledge(c, 'trung tâm có những giáo viên nào', kb);
     expect(sel.refs).toContain('asset:link_teacher_info');
     expect(sel.teachers.length).toBeGreaterThan(0);
+  });
+
+  it('selects both named teacher facts and mentioned IPA classes in mixed questions', () => {
+    const c: Classification = { intent: 'teacher_info', entities: {}, confidence: 0.9 };
+    const sel = selectKnowledge(c, 'cho hỏi hiện tại có lớp ipa không và Hang có đang mở lớp gì không và Hang bao nhiêu tuổi', kb);
+    expect(sel.teachers.map((t) => t.name)).toEqual(expect.arrayContaining(['Thanh Hằng', 'Phương Dung']));
+    expect(sel.teachers.find((t) => t.name === 'Thanh Hằng')?.birth_year).toBe(1999);
+    expect(sel.teachers.find((t) => t.name === 'Phương Dung')?.classes[0]?.code).toBe('IPA+L2');
   });
 });

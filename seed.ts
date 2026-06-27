@@ -57,11 +57,24 @@ async function main() {
   const teachers = loadJson<Teacher[]>('teachers.json');
   for (const t of teachers) {
     await client.query(
-      `insert into swh_teachers (name,tag,role,teaches,classes)
-       values ($1,$2,$3,$4,$5)
+      `insert into swh_teachers (name,tag,role,birth_year,hometown,profile_notes,profile_url,video_urls,teaches,classes)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        on conflict (name) do update set tag=excluded.tag, role=excluded.role,
+         birth_year=excluded.birth_year, hometown=excluded.hometown, profile_notes=excluded.profile_notes,
+         profile_url=excluded.profile_url, video_urls=excluded.video_urls,
          teaches=excluded.teaches, classes=excluded.classes, updated_at=now()`,
-      [t.name, t.tag ?? null, t.role ?? null, t.teaches, JSON.stringify(t.classes)],
+      [
+        t.name,
+        t.tag ?? null,
+        t.role ?? null,
+        t.birth_year ?? null,
+        t.hometown ?? null,
+        t.profile_notes ?? null,
+        t.profile_url ?? null,
+        t.video_urls ?? [],
+        t.teaches,
+        JSON.stringify(t.classes),
+      ],
     );
   }
   console.log(`upserted ${teachers.length} -> swh_teachers`);

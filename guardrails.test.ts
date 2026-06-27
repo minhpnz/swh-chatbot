@@ -108,6 +108,21 @@ describe('validateReply', () => {
     expect(validateReply('Form nè: https://forms.gle/ABC', ctx()).ok).toBe(true);
   });
 
+  it('allows structured teacher profile and video links', () => {
+    const r = validateReply(
+      'Bạn xem profile ở https://s.net.vn/EjyT và record ở https://drive.google.com/file/d/abc/view nha.',
+      ctx({
+        teachers: [
+          {
+            profile_url: 'https://s.net.vn/EjyT',
+            video_urls: ['https://drive.google.com/file/d/abc/view'],
+          },
+        ],
+      }),
+    );
+    expect(r.ok).toBe(true);
+  });
+
   it('flags banned internal terms', () => {
     const r = validateReply('mình là bot của trung tâm nha', ctx());
     expect(r.ok).toBe(false);

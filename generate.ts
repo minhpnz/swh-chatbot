@@ -8,7 +8,7 @@ function actionDirective(decision: Decision): string {
     case 'answer_cta':
       return 'Trả lời ngắn gọn rồi mời khách để lại Tên + SĐT và/hoặc gửi form phù hợp đã cung cấp.';
     default:
-      return 'Trả lời ngắn gọn, đúng dữ liệu, đúng tone SwH. Nếu hợp lý thì xin Tên + SĐT.';
+      return 'Trả lời ngắn gọn, đúng dữ liệu, đúng tone SwH. Không xin Tên + SĐT nếu khách chỉ hỏi thông tin lớp/giáo viên; chỉ xin khi khách muốn tư vấn chọn khoá, đăng ký, nhận ưu đãi/form, hoặc cần follow-up thật.';
   }
 }
 
@@ -25,20 +25,30 @@ function birthYearFromTag(tag: string | undefined): number | null {
   return yy >= 30 ? 1900 + yy : 2000 + yy;
 }
 
-function formatTeacherTag(tag: string | undefined): string {
-  const year = birthYearFromTag(tag);
+function formatTeacherMeta(t: SelectedKnowledge['teachers'][number]): string {
+  const year = t.birth_year ?? birthYearFromTag(t.tag);
+  const tag = t.tag && !birthYearFromTag(t.tag) ? t.tag : undefined;
   if (!year) return tag ? ` (${tag})` : '';
   const currentYear = new Date().getFullYear();
   const age = currentYear - year;
   const ageText = age > 0 ? `, khoảng ${Math.max(0, age - 1)}-${age} tuổi tuỳ sinh nhật` : '';
-  return ` (sinh năm ${year}${ageText})`;
+  const parts = [`sinh năm ${year}${ageText}`];
+  if (tag) parts.push(tag);
+  if (t.hometown) parts.push(`quê quán ${t.hometown}`);
+  return ` (${parts.join('; ')})`;
 }
 
 function renderTeacher(t: SelectedKnowledge['teachers'][number]): string {
-  const head = `• ${t.name}${formatTeacherTag(t.tag)}${t.role ? ` — ${t.role}` : ''}`;
+  const head = `• ${t.name}${formatTeacherMeta(t)}${t.role ? ` — ${t.role}` : ''}`;
+  const extras = [
+    t.profile_notes && `Hồ sơ: ${t.profile_notes}`,
+    t.profile_url && `Link profile: ${t.profile_url}`,
+    t.video_urls?.length && `Video record: ${t.video_urls.join(', ')}`,
+  ].filter(Boolean);
+  const profile = extras.length ? ` ${extras.join('. ')}.` : '';
   if (t.classes.length === 0) {
     const teaches = t.teaches.length ? ` Phụ trách: ${t.teaches.join(', ')}.` : '';
-    return `${head}: hiện chưa có lớp đang mở ghi danh.${teaches}`;
+    return `${head}: hiện chưa có lớp đang mở ghi danh.${teaches}${profile}`;
   }
   const classes = t.classes
     .map((cl) => `   - ${cl.course} (mã ${cl.code})`
@@ -47,7 +57,7 @@ function renderTeacher(t: SelectedKnowledge['teachers'][number]): string {
          cl.price && `, học phí ${cl.price}`, cl.format && `, ${cl.format}`]
         .filter(Boolean).join(''))
     .join('\n');
-  return `${head} đang dạy:\n${classes}`;
+  return `${head} đang dạy:\n${classes}${profile}`;
 }
 
 export function buildGeneratePrompt(sel: SelectedKnowledge, decision: Decision, allowedLinks: string[]): string {
