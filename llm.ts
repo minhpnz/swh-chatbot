@@ -6,7 +6,9 @@ import { parseClassification } from '@/swh/classify';
 // SWH_LLM_PROVIDER=ollama for a free local model (dev/eval, no quota).
 export function createLlmClient(): LlmClient {
   const provider = process.env.SWH_LLM_PROVIDER ?? 'gemini';
-  return provider === 'ollama' ? createOllamaClient() : createGeminiClient();
+  if (provider === 'ollama') return createOllamaClient();
+  if (provider === 'groq') return createGroqClient();
+  return createGeminiClient();
 }
 
 function createGeminiClient(): LlmClient {
@@ -72,6 +74,40 @@ function createOllamaClient(): LlmClient {
     async complete(system: string, messages: ChatTurn[]) {
       const msgs = [{ role: 'system', content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))];
       const content = await chat(msgs, { options: { temperature: 0.7, num_predict: 800 } });
+      return content.trim();
+    },
+  };
+}
+
+// Groq: free, fast, OpenAI-compatible cloud LLM. No quota wall like Gemini free-tier,
+// no self-hosted machine to keep online. Get a free key at console.groq.com.
+function createGroqClient(): LlmClient {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error('Missing GROQ_API_KEY');
+  const model = process.env.SWH_LLM_MODEL ?? 'llama-3.3-70b-versatile';
+
+  async function chat(messages: { role: string; content: string }[], extra: Record<string, unknown>): Promise<string> {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ model, messages, ...extra }),
+    });
+    if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    return data.choices?.[0]?.message?.content ?? '';
+  }
+
+  return {
+    async classify(prompt: string) {
+      const content = await chat([{ role: 'user', content: prompt }], {
+        temperature: 0,
+        response_format: { type: 'json_object' },
+      });
+      return parseClassification(content);
+    },
+    async complete(system: string, messages: ChatTurn[]) {
+      const msgs = [{ role: 'system', content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))];
+      const content = await chat(msgs, { temperature: 0.7, max_tokens: 800 });
       return content.trim();
     },
   };
