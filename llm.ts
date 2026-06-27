@@ -2,13 +2,55 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { LlmClient, ChatTurn } from '@/swh/types';
 import { parseClassification } from '@/swh/classify';
 
+type Provider = 'ollama' | 'groq' | 'gemini';
+
+function createProvider(name: string): LlmClient {
+  if (name === 'ollama') return createOllamaClient();
+  if (name === 'groq') return createGroqClient();
+  return createGeminiClient();
+}
+
+// Wrap two clients so a failure on the primary (quota/429, network, host down)
+// transparently retries on the fallback. Pure logic — unit-tested in llm.test.ts.
+export function withFailover(
+  primary: LlmClient,
+  fallback: LlmClient,
+  onFailover: (op: string, err: unknown) => void = (op, err) =>
+    // eslint-disable-next-line no-console
+    console.warn(`[swh/llm] primary ${op} failed, falling back: ${err instanceof Error ? err.message : err}`),
+): LlmClient {
+  return {
+    async classify(prompt) {
+      try {
+        return await primary.classify(prompt);
+      } catch (e) {
+        onFailover('classify', e);
+        return fallback.classify(prompt);
+      }
+    },
+    async complete(system, messages) {
+      try {
+        return await primary.complete(system, messages);
+      } catch (e) {
+        onFailover('complete', e);
+        return fallback.complete(system, messages);
+      }
+    },
+  };
+}
+
 // Provider-switchable LLM client. Default 'gemini' (for deploy); set
 // SWH_LLM_PROVIDER=ollama for a free local model (dev/eval, no quota).
+// Set SWH_LLM_FALLBACK (e.g. 'ollama') to transparently fail over when the
+// primary errors — e.g. Groq quota exhausted -> self-hosted Ollama tunnel.
 export function createLlmClient(): LlmClient {
   const provider = process.env.SWH_LLM_PROVIDER ?? 'gemini';
-  if (provider === 'ollama') return createOllamaClient();
-  if (provider === 'groq') return createGroqClient();
-  return createGeminiClient();
+  const primary = createProvider(provider);
+  const fallbackName = process.env.SWH_LLM_FALLBACK;
+  if (fallbackName && fallbackName !== provider) {
+    return withFailover(primary, createProvider(fallbackName));
+  }
+  return primary;
 }
 
 function createGeminiClient(): LlmClient {
