@@ -18,20 +18,20 @@ await page.goto(`${BASE}/swh-chatbot`, { waitUntil: 'networkidle' });
 await page.waitForSelector('text=SpeakwithHang', { timeout: 20000 });
 
 for (const m of MSGS) {
-  const before = await page.locator('.text-left span').count();
+  const before = await page.locator('[data-role="assistant"] .max-w-\\[82\\%\\]').count();
   await page.getByPlaceholder('Nhập tin nhắn…').fill(m);
   await page.getByRole('button', { name: 'Gửi' }).click();
-  // wait for a real new assistant bubble (span); the "đang soạn tin" indicator has no span
+  // wait for a real new assistant bubble; the typing indicator has no message body
   await page.waitForFunction(
-    (n) => document.querySelectorAll('.text-left span').length > n,
+    (n) => document.querySelectorAll('[data-role="assistant"] .max-w-\\[82\\%\\]').length > n,
     before,
     { timeout: 180000 },
   );
   await page.waitForTimeout(300);
 }
 
-const userBubbles = await page.locator('.text-right span').allInnerTexts();
-const botBubbles = await page.locator('.text-left span').allInnerTexts();
+const userBubbles = await page.locator('[data-role="user"]').allInnerTexts();
+const botBubbles = await page.locator('[data-role="assistant"] .max-w-\\[82\\%\\]').allInnerTexts();
 console.log('=== CONVERSATION (UI) ===');
 // interleave: greeting(bot0), then user/bot pairs
 console.log('SwH: ' + (botBubbles[0] ?? ''));
