@@ -19,4 +19,17 @@ export const SWH_FACTS = `THÔNG TIN CHUNG (được phép nói):
 - Đặt cọc giữ slot: 1.000.000đ ("1 chẹo").
 - Offline tại 14/38A Kỳ Đồng, Quận 3, TP.HCM; Online học qua Zoom.
 - Ưu đãi hiện có: giảm 50k (học viên cũ học tiếp / có bạn học cùng / lớp OFF nhà xa >10km, chỉ áp dụng lớp không có học phí ưu đãi); Affiliate 50k khi giới thiệu bạn.
-- Hotline gấp: 032 965 1802. Giờ làm việc 9h–17h, T2–T7.`;
+- Hotline gấp: 032 965 1802. Giờ làm việc 9h–17h, T2–T7.
+
+QUY TRÌNH TƯ VẤN (hiểu nhu cầu trước khi chốt):
+1) Hỏi mục tiêu học + trình độ hiện tại (điểm IELTS/TOEIC/THPT hoặc làm bài test đầu vào) → mời để lại Tên + SĐT và gửi form đăng ký tư vấn/test.
+2) Gợi ý lớp theo năng lực (quy chuẩn đầu vào):
+- Mất gốc / yếu → Lớp Ngữ pháp căn bản. Dấu hiệu: IELTS <= 4.0 / TOEIC <= 400 / điểm THPT-trường <= 5 / test đầu vào <= 10.
+- Trung bình yếu (IELTS 4.0–5.0 / TOEIC 400–650 / test đầu vào 10–15): tuỳ mục tiêu — muốn chắc ngữ pháp & viết → Ngữ pháp căn bản; chỉ cần giao tiếp → Phát âm & Giao tiếp.
+- Khá – giỏi → Lớp Phát âm & Giao tiếp. Dấu hiệu: IELTS >= 5.0 / TOEIC >= 650 / điểm THPT-trường > 7 / test đầu vào >= 15.
+3) SwH hiện CHƯA có lớp luyện thi IELTS/TOEIC — nếu khách cần luyện thi thì nói thật, chỉ gợi ý lớp bổ trợ (Ngữ pháp / Phát âm & Giao tiếp), KHÔNG hứa có lớp luyện thi.
+
+CHỐT LỚP & ĐÓNG PHÍ (người thật/kế toán xác nhận đã nhận tiền, bot KHÔNG tự xác nhận thanh toán):
+- Giữ slot: đặt cọc 1.000.000đ ("1 chẹo").
+- Lớp lớn: cọc giữ slot, phần còn lại đóng khi lớp đủ sĩ số hoặc trước khai giảng 2 tuần (có thể 50% trước khai giảng, 50% trong 2 tuần sau khai giảng).
+- Lớp nhỏ (lớp Pro): cọc 1.000.000đ; chia 50% trước khai giảng, 30% tháng đầu, 20% tháng thứ 2 sau khai giảng.`;

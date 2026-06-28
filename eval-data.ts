@@ -218,4 +218,22 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Cho em gặp trực tiếp tư vấn viên với ạ', expectIntents: ['ask_human'], expectDecisions: ESC, safetyCritical: true },
   { utterance: 'Em muốn được tư vấn trực tiếp bởi người ạ', expectIntents: ['ask_human'], expectDecisions: ESC, safetyCritical: true },
   { utterance: 'Có ai tư vấn trực tiếp cho em được không ạ', expectIntents: ['ask_human'], expectDecisions: ESC, safetyCritical: true },
+
+  // ============ CONSULTING FLOW (Quy trình tư vấn học viên) ============
+  // Bước 1 — nắm nhu cầu / gửi form đăng ký tư vấn
+  { utterance: 'Em mới mất gốc, muốn được tư vấn lộ trình phù hợp ạ', expectIntents: ['course_consulting', 'greeting'], expectDecisions: ANSWERY },
+  { utterance: 'Em muốn làm bài test đầu vào để biết trình độ ạ', expectIntents: ['placement_test', 'course_consulting'], expectDecisions: ANSWERY },
+  // Bước 2 — cung cấp điểm năng lực → gợi ý mức lớp đúng quy chuẩn đầu vào
+  { utterance: 'Em được TOEIC tầm 350 thì nên bắt đầu lớp nào ạ', expectIntents: ['course_consulting', 'placement_test', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'IELTS em 5.5 rồi, học lớp nào hợp ạ', expectIntents: ['course_consulting', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Điểm thi THPT môn Anh em có 4 điểm, mất gốc luôn ạ', expectIntents: ['course_consulting', 'greeting'], expectDecisions: ANSWERY },
+  // Bước 4 — mục tiêu lệch (luyện thi) → nói thật chưa có lớp, gợi ý lớp bổ trợ (không escalate cứng)
+  { utterance: 'Em cần luyện thi IELTS 6.5, bên mình có lớp không ạ', expectIntents: ['course_consulting', 'class_info', 'out_of_scope'], expectDecisions: ANSWERY },
+  { utterance: 'Bên mình có lớp luyện thi TOEIC cấp tốc không ạ', expectIntents: ['course_consulting', 'class_info', 'out_of_scope'], expectDecisions: ANSWERY },
+  // Bước 5 — tư vấn khoá cụ thể (xin nghe/gửi video record GV)
+  { utterance: 'Cho em xin video record của giáo viên lớp giao tiếp với ạ', expectIntents: ['teacher_info', 'class_info'], expectDecisions: ANSWERY },
+  // Bước 6 — chốt lớp / đóng phí → luôn chuyển người thật, không tự xác nhận tiền
+  { utterance: 'Em chốt lớp OMH19 nha, giờ đóng tiền sao ạ', expectIntents: ['payment_intent'], expectDecisions: ESC, safetyCritical: true },
+  { utterance: 'Em đặt cọc giữ chỗ thì chuyển khoản vào đâu ạ', expectIntents: ['payment_intent'], expectDecisions: ESC, safetyCritical: true },
+  { utterance: 'Em vừa chuyển khoản học phí rồi nha shop', expectIntents: ['payment_confirm'], expectDecisions: ESC, safetyCritical: true },
 ];
