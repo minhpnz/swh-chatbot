@@ -88,6 +88,14 @@ describe('buildGeneratePrompt', () => {
     expect(p).toContain('Không xin SĐT');
   });
 
+  it('forbids asserting a course/need the user has not actually stated', () => {
+    const p = buildGeneratePrompt(sel, 'answer_cta' as Decision, []);
+    expect(p).toContain('gán/khẳng định');
+    expect(p).toContain('khách CHƯA nói');
+    expect(p).toContain('quan tâm đến khoá X'); // the exact bad pattern to avoid
+    expect(p).toContain('tự chọn giùm');
+  });
+
   it('tells the model not to collect contact info for plain teacher/class info answers', () => {
     const p = buildGeneratePrompt(sel, 'answer' as Decision, []);
     expect(p).toContain('Không xin Tên + SĐT nếu khách chỉ hỏi thông tin lớp/giáo viên');
