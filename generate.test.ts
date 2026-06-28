@@ -71,11 +71,20 @@ describe('buildGeneratePrompt', () => {
     expect(p).toContain('Video record: https://drive.google.com/file/d/1a53hAW_eC01KohImnJYX0-Ae3PO0pKIx/view?usp=drive_link');
   });
 
-  it('tells the model not to collect contact info for casual missing teacher/profile data', () => {
+  it('demands precision on hard facts (fee/schedule/policy/rules) and flexibility on everyday questions', () => {
     const p = buildGeneratePrompt({ ...sel, courses: [], faqs: [], policies: [] }, 'answer' as Decision, []);
+    // (1) hard facts must be exact — never improvised
+    expect(p).toContain('PHẢI chính xác');
+    expect(p).toContain('học phí');
+    expect(p).toContain('chính sách, quy định');
+    // (2) everyday / soft questions are general (teacher age is just one example)
     expect(p).toContain('câu hỏi đời thường');
-    expect(p).toContain('em cũng không biết nữa hehe');
+    expect(p).toContain('phải trả lời đúng theo dữ liệu'); // answer from data when present
+    expect(p).toContain('năm sinh, tuổi'); // example of a soft fact that lives in data
+    expect(p).toContain('em cũng không rõ á hehe'); // hedge only when truly absent
     expect(p).toContain('tránh câu máy móc');
+    // never escalate / ask for contact on a casual question
+    expect(p).toContain('KHÔNG escalate');
     expect(p).toContain('Không xin SĐT');
   });
 
