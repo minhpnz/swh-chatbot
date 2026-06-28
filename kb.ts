@@ -131,6 +131,16 @@ export function selectKnowledge(c: Classification, text: string, kb: KnowledgeBa
     });
     teachers = [...teachers, ...classMatches.filter((t) => !teachers.some((existing) => existing.name === t.name))];
   }
+  // Match by class code too (e.g. "thông tin lớp OMH19"). Codes are stored on
+  // each teacher's classes; only treat code-like tokens (no spaces, len>=4) as
+  // lookups so a stray "1-1" can't false-match.
+  const codeMatches = allTeachers.filter((t) =>
+    t.classes.some((cl) => {
+      const code = normalizeVietnamese(cl.code);
+      return /^[a-z0-9+]{4,}$/u.test(code) && hay.includes(code);
+    }),
+  );
+  teachers = [...teachers, ...codeMatches.filter((t) => !teachers.some((existing) => existing.name === t.name))];
   if (c.intent === 'teacher_info' && teachers.length === 0) teachers = allTeachers;
   teachers.forEach((t) => refs.push(`teacher:${t.name}`));
   if (c.intent === 'teacher_info' || teachers.length > 0) {

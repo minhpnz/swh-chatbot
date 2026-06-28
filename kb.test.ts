@@ -50,6 +50,13 @@ describe('selectKnowledge', () => {
     expect(sel.refs.length).toBeGreaterThan(0);
   });
 
+  it('matches a teacher by class code (e.g. "thông tin lớp OMH19")', () => {
+    const c: Classification = { intent: 'class_info', entities: {}, confidence: 0.8 };
+    const sel = selectKnowledge(c, 'thong tin lop OMH19', kb);
+    expect(sel.teachers.map((t) => t.name)).toContain('Thanh Hằng');
+    expect(sel.refs).toContain('teacher:Thanh Hằng');
+  });
+
   it('includes the policy row for a policy_question by topic', () => {
     const c: Classification = { intent: 'policy_question', entities: { policy_topic: 'bao_luu' }, confidence: 0.9 };
     const sel = selectKnowledge(c, 'có bảo lưu không', kb);
