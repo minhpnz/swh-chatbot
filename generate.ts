@@ -39,7 +39,12 @@ function formatTeacherMeta(t: SelectedKnowledge['teachers'][number]): string {
 }
 
 function renderTeacher(t: SelectedKnowledge['teachers'][number]): string {
-  const head = `• ${t.name}${formatTeacherMeta(t)}${t.role ? ` — ${t.role}` : ''}`;
+  // Founder must always be referred to by name, never "cô/chị" — put the rule
+  // inline next to her data so the model can't miss it.
+  const founderNote = /founder/i.test(t.role ?? '')
+    ? ` [LƯU Ý: luôn gọi thẳng tên "${t.name}", KHÔNG xưng "cô"/"chị"/"cô ấy" với người này]`
+    : '';
+  const head = `• ${t.name}${formatTeacherMeta(t)}${t.role ? ` — ${t.role}` : ''}${founderNote}`;
   const extras = [
     t.profile_notes && `Hồ sơ: ${t.profile_notes}`,
     t.profile_url && `Link profile: ${t.profile_url}`,

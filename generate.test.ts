@@ -96,6 +96,25 @@ describe('buildGeneratePrompt', () => {
     expect(p).toContain('tự chọn giùm');
   });
 
+  it('strictly forbids calling the founder "cô/chị" — inline reminder on the founder row', () => {
+    const withFounder: SelectedKnowledge = {
+      ...sel,
+      teachers: [{ name: 'Thanh Hằng', role: 'Founder & Giáo viên', birth_year: 1999, teaches: [], classes: [] }],
+    };
+    const p = buildGeneratePrompt(withFounder, 'answer' as Decision, []);
+    expect(p).toContain('luôn gọi thẳng tên "Thanh Hằng"');
+    expect(p).toContain('KHÔNG xưng "cô"');
+  });
+
+  it('does NOT add the founder reminder for a normal teacher (cô/thầy is fine)', () => {
+    const withTeacher: SelectedKnowledge = {
+      ...sel,
+      teachers: [{ name: 'Phương Dung', role: 'Giáo viên', birth_year: 2002, teaches: [], classes: [] }],
+    };
+    const p = buildGeneratePrompt(withTeacher, 'answer' as Decision, []);
+    expect(p).not.toContain('luôn gọi thẳng tên');
+  });
+
   it('tells the model not to collect contact info for plain teacher/class info answers', () => {
     const p = buildGeneratePrompt(sel, 'answer' as Decision, []);
     expect(p).toContain('Không xin Tên + SĐT nếu khách chỉ hỏi thông tin lớp/giáo viên');
