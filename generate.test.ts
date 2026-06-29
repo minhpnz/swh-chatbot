@@ -115,6 +115,20 @@ describe('buildGeneratePrompt', () => {
     expect(p).not.toContain('luôn gọi thẳng tên');
   });
 
+  it('offers a sendable image as markdown when one is selected', () => {
+    const withImage: SelectedKnowledge = {
+      ...sel,
+      images: [{ type: 'image', key: 'img_schedule', label: 'Lịch khai giảng các lớp', value: 'https://cdn.example/lich-khai-giang.png', when_to_use: 'Khách hỏi lịch / học phí' }],
+    };
+    const p = buildGeneratePrompt(withImage, 'answer' as Decision, []);
+    expect(p).toContain('HÌNH ẢNH ĐƯỢC PHÉP GỬI KÈM');
+    expect(p).toContain('![Lịch khai giảng các lớp](https://cdn.example/lich-khai-giang.png)');
+  });
+
+  it('renders no image section when none selected', () => {
+    expect(buildGeneratePrompt(sel, 'answer' as Decision, [])).not.toContain('HÌNH ẢNH ĐƯỢC PHÉP GỬI KÈM');
+  });
+
   it('tells the model not to collect contact info for plain teacher/class info answers', () => {
     const p = buildGeneratePrompt(sel, 'answer' as Decision, []);
     expect(p).toContain('Không xin Tên + SĐT nếu khách chỉ hỏi thông tin lớp/giáo viên');

@@ -93,6 +93,7 @@ export async function runPipeline(input: PipelineInput, llm: LlmClient): Promise
     const teacherLinks = (kb.teachers ?? []).flatMap((t) => [t.profile_url, ...(t.video_urls ?? [])]);
     const allowedLinks = [
       ...kb.assets.filter((a) => a.type === 'form' || a.type === 'link').map((a) => a.value),
+      ...(sel.images ?? []).map((a) => a.value),
       ...teacherLinks.filter((url): url is string => Boolean(url)),
     ];
     reply = await generateReply(sel, decision, allowedLinks, history, text, llm);

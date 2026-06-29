@@ -3,6 +3,7 @@
   { "type": "form", "key": "form_placement", "label": "Form test trình độ", "value": "https://forms.gle/2TpDaYTAGaEMXyKN8", "when_to_use": "Khách quan tâm 1 khoá cụ thể / cần đánh giá level" },
   { "type": "image", "key": "img_banner_grammar", "label": "Banner tổng ngữ pháp", "value": "https://speakwithhang.com/wp-content/uploads/2025/09/banner-tong-ngu-phap.jpg", "when_to_use": "Tư vấn chung" },
   { "type": "image", "key": "img_banner_speaking", "label": "Banner giao tiếp", "value": "https://speakwithhang.com/wp-content/uploads/2025/09/banner-tong-giao-tiep.jpg", "when_to_use": "Hỏi lớp online/giao tiếp" },
+  { "type": "image", "key": "img_schedule", "label": "Lịch khai giảng các lớp", "value": "https://fepnjgtczvwgwomjhjnq.supabase.co/storage/v1/object/public/swh-public/lich-khai-giang.png", "when_to_use": "Khách hỏi lịch khai giảng / lịch học / học phí / sĩ số / tư vấn các lớp đang mở" },
   { "type": "phone", "key": "hotline", "label": "Hotline", "value": "032 965 1802", "when_to_use": "Khách cần liên hệ gấp" },
   { "type": "link", "key": "link_teacher_info", "label": "Hồ sơ giáo viên & video record", "value": "https://s.net.vn/EjyT", "when_to_use": "Khách hỏi về giáo viên / muốn xem profile + video buổi học từng lớp" },
   { "type": "template", "key": "holding_payment", "value": "Phần đóng tiền/thanh toán tụi mình sẽ nhờ tư vấn viên hỗ trợ trực tiếp cho chính xác nha. Bạn cho tụi mình xin Tên + SĐT để tư vấn viên liên hệ lại sớm nhất nhé 🥰" },

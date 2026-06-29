@@ -1,5 +1,5 @@
 import type {
-  Classification, Course, PolicyRow, Teacher, KnowledgeBase, SelectedKnowledge,
+  Classification, Course, PolicyRow, Teacher, Asset, KnowledgeBase, SelectedKnowledge,
 } from '@/swh/types';
 
 const STOP = new Set([
@@ -148,5 +148,20 @@ export function selectKnowledge(c: Classification, text: string, kb: KnowledgeBa
     if (link) refs.push(`asset:${link.key}`);
   }
 
-  return { courses, faqs, policies, teachers, refs };
+  // Sendable images: attach the class-schedule banner when the question is about
+  // schedule / price / classes — mirrors the human flow "gửi kèm lịch khai giảng".
+  const images: Asset[] = [];
+  const wantsSchedule =
+    SCHEDULE_IMAGE_INTENTS.has(c.intent)
+    || /\b(lich khai giang|khai giang|lich hoc|hoc phi|si so)\b/u.test(hay);
+  if (wantsSchedule) {
+    const sched = (kb.assets ?? []).find((a) => a.key === 'img_schedule' && a.type === 'image');
+    if (sched) { images.push(sched); refs.push(`image:${sched.key}`); }
+  }
+
+  return { courses, faqs, policies, teachers, images, refs };
 }
+
+const SCHEDULE_IMAGE_INTENTS = new Set<string>([
+  'ask_schedule', 'ask_price', 'class_info', 'course_consulting', 'promo', 'trial_class',
+]);

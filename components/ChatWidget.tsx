@@ -36,7 +36,7 @@ function Bubble({ role, content }: Msg) {
         {isUser ? (
           <span className="whitespace-pre-wrap">{content}</span>
         ) : (
-          <div className="space-y-2 break-words [&_a]:font-medium [&_a]:text-pink-600 [&_a]:underline [&_a]:underline-offset-2 [&_em]:italic [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:list-disc [&_ul]:pl-5">
+          <div className="space-y-2 break-words [&_a]:font-medium [&_a]:text-pink-600 [&_a]:underline [&_a]:underline-offset-2 [&_em]:italic [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-rose-100 [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:list-disc [&_ul]:pl-5">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{

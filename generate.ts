@@ -72,12 +72,16 @@ export function buildGeneratePrompt(sel: SelectedKnowledge, decision: Decision, 
   const faqs = sel.faqs.map((f) => `Q: ${f.representative_q}\nA: ${f.answer}`).join('\n\n');
   const policies = sel.policies.map((p) => `• ${p.topic}: ${p.public_answer}`).join('\n');
   const teachers = sel.teachers.map(renderTeacher).join('\n');
+  const images = (sel.images ?? [])
+    .map((a) => `![${a.label ?? 'hình'}](${a.value})${a.when_to_use ? ` — ${a.when_to_use}` : ''}`)
+    .join('\n');
 
   return [
     SWH_PERSONA,
     SWH_FACTS,
     courses ? `KHOÁ HỌC LIÊN QUAN:\n${courses}` : '',
     teachers ? `GIÁO VIÊN & LỚP ĐANG MỞ (chỉ dùng đúng dữ liệu này, kèm link hồ sơ GV nếu có để khách xem profile + video record):\n${teachers}` : '',
+    images ? `HÌNH ẢNH ĐƯỢC PHÉP GỬI KÈM (nếu phù hợp với câu hỏi, chèn NGUYÊN cú pháp markdown ảnh "![...](...)" vào cuối câu trả lời, KHÔNG sửa link):\n${images}` : '',
     faqs ? `CÂU TRẢ LỜI MẪU (ưu tiên dùng gần đúng, giữ nguyên ý + tone):\n${faqs}` : '',
     policies ? `CHÍNH SÁCH ĐƯỢC PHÉP NÓI:\n${policies}` : '',
     allowedLinks.length ? `CHỈ ĐƯỢC DÙNG CÁC LINK SAU (nếu cần):\n${allowedLinks.join('\n')}` : 'KHÔNG được chèn link nào.',

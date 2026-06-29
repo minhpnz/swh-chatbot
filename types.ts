@@ -116,5 +116,6 @@ export interface LlmClient {
 }
 
 export interface SelectedKnowledge {
-  courses: Course[]; faqs: Faq[]; policies: PolicyRow[]; teachers: Teacher[]; refs: string[];
+  courses: Course[]; faqs: Faq[]; policies: PolicyRow[]; teachers: Teacher[];
+  images?: Asset[]; refs: string[];
 }

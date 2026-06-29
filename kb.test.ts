@@ -17,6 +17,7 @@ const kb: KnowledgeBase = {
   ],
   assets: [
     { type: 'link', key: 'link_teacher_info', label: 'Hồ sơ giáo viên', value: 'https://s.net.vn/EjyT', when_to_use: 'Khách hỏi về giáo viên' },
+    { type: 'image', key: 'img_schedule', label: 'Lịch khai giảng các lớp', value: 'https://example.supabase.co/storage/v1/object/public/swh-public/lich-khai-giang.png', when_to_use: 'Khách hỏi lịch / học phí' },
   ],
   teachers: [
     {
@@ -55,6 +56,19 @@ describe('selectKnowledge', () => {
     const sel = selectKnowledge(c, 'thong tin lop OMH19', kb);
     expect(sel.teachers.map((t) => t.name)).toContain('Thanh Hằng');
     expect(sel.refs).toContain('teacher:Thanh Hằng');
+  });
+
+  it('attaches the class-schedule image for schedule/price/class questions', () => {
+    for (const intent of ['ask_schedule', 'ask_price', 'class_info', 'course_consulting'] as const) {
+      const sel = selectKnowledge({ intent, entities: {}, confidence: 0.9 }, 'lịch khai giảng và học phí thế nào ạ', kb);
+      expect(sel.images?.map((a) => a.key)).toContain('img_schedule');
+      expect(sel.refs).toContain('image:img_schedule');
+    }
+  });
+
+  it('does NOT attach the schedule image for unrelated questions (e.g. teacher age)', () => {
+    const sel = selectKnowledge({ intent: 'teacher_info', entities: {}, confidence: 0.9 }, 'Thanh Hằng bao nhiêu tuổi', kb);
+    expect(sel.images ?? []).toEqual([]);
   });
 
   it('includes the policy row for a policy_question by topic', () => {

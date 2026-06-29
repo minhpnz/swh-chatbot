@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import pg from 'pg';
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, statSync, existsSync } from 'node:fs';
 import { resolve, extname, basename } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -117,6 +117,69 @@ async function extractAll(alreadyImaged: Set<string>): Promise<Doc[]> {
   return docs;
 }
 
+// ---- Sendable images: upload to public Storage + upsert swh_assets ----------
+// Images from swh_data that the bot may SEND to customers (not just OCR for text).
+// Re-running ingest re-uploads + re-upserts, keeping the DB sendable-image in sync.
+const STORAGE_BUCKET = 'swh-public';
+const SENDABLE_IMAGES: { file: string; key: string; label: string; when_to_use: string; storagePath: string }[] = [
+  {
+    file: 'Screenshot 2026-06-27 at 00.42.16.png',
+    key: 'img_schedule',
+    label: 'Lịch khai giảng các lớp',
+    when_to_use: 'Khách hỏi lịch khai giảng / lịch học / học phí / sĩ số / tư vấn các lớp đang mở',
+    storagePath: 'lich-khai-giang.png',
+  },
+];
+
+function supaEnv(): { url: string; key: string } {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (needed to upload images)');
+  return { url: url.replace(/\/$/, ''), key };
+}
+
+async function ensureBucket(): Promise<void> {
+  const { url, key } = supaEnv();
+  const res = await fetch(`${url}/storage/v1/bucket`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${key}`, apikey: key, 'content-type': 'application/json' },
+    body: JSON.stringify({ id: STORAGE_BUCKET, name: STORAGE_BUCKET, public: true }),
+  });
+  // 200 created; 400/409 = already exists.
+  if (!res.ok && res.status !== 400 && res.status !== 409) {
+    throw new Error(`create bucket ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
+}
+
+async function uploadPublic(path: string, bytes: Buffer, contentType: string): Promise<string> {
+  const { url, key } = supaEnv();
+  const res = await fetch(`${url}/storage/v1/object/${STORAGE_BUCKET}/${path}`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${key}`, apikey: key, 'content-type': contentType, 'x-upsert': 'true' },
+    body: bytes,
+  });
+  if (!res.ok) throw new Error(`upload ${path} ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return `${url}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+}
+
+async function syncSendableImages(client: pg.Client): Promise<void> {
+  const present = SENDABLE_IMAGES.filter((s) => existsSync(resolve(DATA_DIR, s.file)));
+  if (present.length === 0) { console.log('  (no sendable images found in data dir)'); return; }
+  await ensureBucket();
+  for (const s of present) {
+    const ext = extname(s.file).toLowerCase();
+    const publicUrl = await uploadPublic(s.storagePath, readFileSync(resolve(DATA_DIR, s.file)), mimeOf(ext));
+    await client.query(
+      `insert into swh_assets (type,key,label,value,when_to_use,status)
+       values ('image',$1,$2,$3,$4,'active')
+       on conflict (key) do update set type='image', label=excluded.label, value=excluded.value,
+         when_to_use=excluded.when_to_use, status='active', updated_at=now()`,
+      [s.key, s.label, publicUrl, s.when_to_use],
+    );
+    console.log(`  asset ${s.key} -> ${publicUrl}`);
+  }
+}
+
 function pgUrl(): string {
   const raw = process.env.POSTGRES_URL_NON_POOLING ?? process.env.POSTGRES_URL;
   if (!raw) throw new Error('Missing POSTGRES_URL_NON_POOLING / POSTGRES_URL');
@@ -154,6 +217,10 @@ async function main() {
       [d.source_file, d.kind, d.content, d.content_hash],
     );
   }
+  // Sync sendable images -> Storage + swh_assets (so the bot can attach them).
+  console.log('Syncing sendable images -> Storage + swh_assets…');
+  await syncSendableImages(client);
+
   await client.end();
   console.log(`\nUpserted ${docs.length} -> swh_kb_documents; wrote ${docs.length} files to swh/ingested/`);
 }
