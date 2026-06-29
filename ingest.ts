@@ -156,7 +156,7 @@ async function uploadPublic(path: string, bytes: Buffer, contentType: string): P
   const res = await fetch(`${url}/storage/v1/object/${STORAGE_BUCKET}/${path}`, {
     method: 'POST',
     headers: { authorization: `Bearer ${key}`, apikey: key, 'content-type': contentType, 'x-upsert': 'true' },
-    body: bytes,
+    body: new Uint8Array(bytes), // Buffer isn't typed as BodyInit; a plain Uint8Array is
   });
   if (!res.ok) throw new Error(`upload ${path} ${res.status}: ${(await res.text()).slice(0, 200)}`);
   return `${url}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
