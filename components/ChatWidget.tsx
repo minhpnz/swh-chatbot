@@ -18,7 +18,7 @@ function NomadLogo({ className = '' }: { className?: string }) {
   );
 }
 
-function Bubble({ role, content }: Msg) {
+function Bubble({ role, content, onImageClick }: Msg & { onImageClick?: (src: string) => void }) {
   const isUser = role === 'user';
   return (
     <div
@@ -36,11 +36,16 @@ function Bubble({ role, content }: Msg) {
         {isUser ? (
           <span className="whitespace-pre-wrap">{content}</span>
         ) : (
-          <div className="space-y-2 break-words [&_a]:font-medium [&_a]:text-pink-600 [&_a]:underline [&_a]:underline-offset-2 [&_em]:italic [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-rose-100 [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:list-disc [&_ul]:pl-5">
+          <div className="space-y-2 break-words [&_a]:font-medium [&_a]:text-pink-600 [&_a]:underline [&_a]:underline-offset-2 [&_em]:italic [&_img]:my-2 [&_img]:max-w-full [&_img]:cursor-zoom-in [&_img]:rounded-xl [&_img]:border [&_img]:border-rose-100 [&_img]:transition [&_img]:hover:brightness-95 [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:list-disc [&_ul]:pl-5">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
                 a: ({ ...p }) => <a {...p} target="_blank" rel="noreferrer noopener" />,
+                img: ({ src, alt }) =>
+                  typeof src === 'string' ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={src} alt={alt ?? ''} onClick={() => onImageClick?.(src)} />
+                  ) : null,
               }}
             >
               {content}
@@ -56,12 +61,19 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<Msg[]>([{ role: 'assistant', content: GREETING }]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [zoom, setZoom] = useState<string | null>(null);
   const convId = useRef<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     convId.current = localStorage.getItem(STORAGE_KEY);
   }, []);
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setZoom(null);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [zoom]);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, busy]);
@@ -110,7 +122,7 @@ export function ChatWidget() {
       {/* Messages */}
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5">
         {messages.map((m, i) => (
-          <Bubble key={i} role={m.role} content={m.content} />
+          <Bubble key={i} role={m.role} content={m.content} onImageClick={setZoom} />
         ))}
         {busy && (
           <div data-role="assistant" className="flex items-end gap-2">
@@ -156,6 +168,31 @@ export function ChatWidget() {
         </div>
         <p className="mt-2 text-center text-[11px] text-gray-300">SpeakwithHang</p>
       </div>
+
+      {/* Image lightbox (tap to zoom, tap anywhere / Esc to close) */}
+      {zoom && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setZoom(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm duration-200 animate-in fade-in"
+        >
+          <button
+            aria-label="Đóng"
+            onClick={() => setZoom(null)}
+            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/15 text-2xl leading-none text-white transition hover:bg-white/25"
+          >
+            ×
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={zoom}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[92vh] max-w-[96vw] rounded-lg object-contain shadow-2xl duration-200 animate-in zoom-in-95"
+          />
+        </div>
+      )}
     </div>
   );
 }
