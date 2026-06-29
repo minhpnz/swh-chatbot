@@ -236,4 +236,25 @@ export const EVAL_CASES: EvalCase[] = [
   { utterance: 'Em chốt lớp OMH19 nha, giờ đóng tiền sao ạ', expectIntents: ['payment_intent'], expectDecisions: ESC, safetyCritical: true },
   { utterance: 'Em đặt cọc giữ chỗ thì chuyển khoản vào đâu ạ', expectIntents: ['payment_intent'], expectDecisions: ESC, safetyCritical: true },
   { utterance: 'Em vừa chuyển khoản học phí rồi nha shop', expectIntents: ['payment_confirm'], expectDecisions: ESC, safetyCritical: true },
+
+  // ============ FAQ knowledge base — real variant phrasings (faq.csv) ============
+  // Nội quy lớp (nghỉ/học bù, chuyển lớp, record) — published policy, answerable
+  { utterance: 'Nếu có buổi học mà e bận thì có đc học bù ko ạ', expectIntents: ['policy_question', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Nếu nghỉ học buổi nào thì cần báo trước và dạy bù không ạ', expectIntents: ['policy_question', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Dạ mình đăng ký lớp Offline rồi thì sau đó có thể chuyển qua lớp Online được không ạ', expectIntents: ['policy_question', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Sau buổi học có record không ạ', expectIntents: ['policy_question', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Lớp off thì có bài record không ạ', expectIntents: ['policy_question', 'class_info'], expectDecisions: ANSWERY },
+  // Quy trình ghi danh / xếp lớp
+  { utterance: 'Em có cần kiểm tra đầu vào/xếp lớp không ạ', expectIntents: ['placement_test', 'course_consulting', 'class_info'], expectDecisions: ANSWERY },
+  // class_info / consulting nuance from FAQ
+  { utterance: 'Mình có thể đăng kí học song song lớp Ngữ pháp + Phát âm & Giao tiếp không ạ', expectIntents: ['course_consulting', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Lớp Phát âm & Giao tiếp cơ bản có dạy ngữ pháp không?', expectIntents: ['course_consulting', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Học xong khoá ngữ pháp thì có thể thi TOEIC và IELTS được không ạ?', expectIntents: ['course_consulting', 'class_info', 'out_of_scope'], expectDecisions: ANSWERY },
+  { utterance: 'Học xong lớp ngữ pháp là viết được một câu hoàn chỉnh đúng không ạ?', expectIntents: ['course_consulting', 'class_info'], expectDecisions: ANSWERY },
+  { utterance: 'Trong quá trình học sẽ được hỗ trợ ra sao ạ?', expectIntents: ['class_info', 'course_consulting'], expectDecisions: ANSWERY },
+  // Ưu đãi — messy real wording
+  { utterance: 'E gth thêm bạn học thì có đc ưu đãi gì khom ạ', expectIntents: ['promo'], expectDecisions: ANSWERY },
+  { utterance: 'Lớp này kh có ưu đãi đúng kh ạ', expectIntents: ['promo'], expectDecisions: ANSWERY },
+  // Toeic/Ielts scope
+  { utterance: 'Bên bạn có nhận dạy TOEIC/IELTS không ạ?', expectIntents: ['course_consulting', 'class_info', 'out_of_scope'], expectDecisions: ANSWERY },
 ];
